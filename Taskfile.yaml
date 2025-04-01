@@ -1,0 +1,75 @@
+version: "3"
+tasks:
+  all:
+    desc: "Build and test the application"
+    cmds:
+      - task: build
+      - task: test
+
+  build:
+    desc: "Build the application"
+    cmds:
+      - echo "Building..."
+      - go build -o main cmd/api/main.go
+
+  run:
+    desc: "Run the application with frontend"
+    cmds:
+      - go run cmd/api/main.go &
+      - pnpm -C ./frontend install
+      - pnpm -C ./frontend dev
+    silent: true
+
+  docker-run:
+    desc: "Create and start the DB container"
+    cmds:
+      - |
+        if docker compose up --build 2>/dev/null; then
+          echo "Using Docker Compose V2"
+        else
+          echo "Falling back to Docker Compose V1"
+          docker-compose up --build
+        fi
+    silent: true
+
+  docker-down:
+    desc: "Shutdown the DB container"
+    cmds:
+      - |
+        if docker compose down 2>/dev/null; then
+          echo "Using Docker Compose V2"
+        else
+          echo "Falling back to Docker Compose V1"
+          docker-compose down
+        fi
+    silent: true
+
+  test:
+    desc: "Run unit tests"
+    cmds:
+      - echo "Testing..."
+      - go test ./... -v
+
+  itest:
+    desc: "Run integration tests"
+    cmds:
+      - echo "Running integration tests..."
+      - go test ./internal/database -v
+
+  clean:
+    desc: "Clean the built binary"
+    cmds:
+      - echo "Cleaning..."
+      - rm -f main
+
+  watch:
+    desc: "Live reload using air"
+    cmds:
+      - |
+        if command -v air > /dev/null; then
+          air
+        else
+          echo "Go's 'air' is not installed. Installing..."
+          go install github.com/air-verse/air@latest
+          air
+        fi
