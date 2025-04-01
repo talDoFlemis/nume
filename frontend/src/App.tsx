@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   const fetchData = () => {
     fetch(`http://localhost:${import.meta.env.VITE_PORT}/`)
-      .then(response => response.text())
-      .then(data => setMessage(data))
-      .catch(error => console.error('Error fetching data:', error))
-  }
-  const [message, setMessage] = useState<string>('')
+      .then((response) => response.text())
+      .then((data) => setMessage(data))
+      .catch((error) => console.error("Error fetching data:", error));
+  };
+  const [message, setMessage] = useState<string>("");
 
   return (
     <>
@@ -25,6 +25,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+      <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -36,9 +37,7 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-      <button onClick={fetchData}>
-        Click to fetch from Go server
-      </button>
+      <button onClick={fetchData}>Click to fetch from Go server</button>
       {message && (
         <div>
           <h2>Server Response:</h2>
@@ -46,7 +45,7 @@ function App() {
         </div>
       )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
