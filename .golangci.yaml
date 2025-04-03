@@ -1,0 +1,60 @@
+version: "2"
+
+linters:
+  enable:
+    - bodyclose
+    - copyloopvar
+    - dogsled
+    - dupl
+    - errcheck
+    - errorlint
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - godox
+    - mnd
+    - goprintffuncname
+    - gosec
+    - govet
+    - intrange
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - revive
+    - staticcheck
+    - testifylint
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+    - sloglint
+  settings:
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: exported
+          disabled: true
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - errcheck
+          - dupl
+          - gosec
+          - revive
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+    - golines
+
+run:
+  timeout: 10m
