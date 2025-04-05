@@ -10,14 +10,15 @@ tasks:
     desc: "Build the application"
     cmds:
       - echo "Building..."
-      - go build -o main cmd/api/main.go
+      - go build -o main ./cmd/web/main.go
 
   run:
     desc: "Run the application with frontend"
     cmds:
-      - go run cmd/web/main.go &
       - pnpm -C ./frontend install
-      - pnpm -C ./frontend dev
+      - pnpm -C ./frontend build
+      - pnpm -C ./frontend dev &
+      - air
     silent: true
 
   docker-run:
