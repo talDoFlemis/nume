@@ -2,12 +2,14 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	slogecho "github.com/samber/slog-echo"
 
 	"github.com/taldoflemis/nume/configs"
 )
@@ -35,7 +37,7 @@ func NewServer(httpConfig configs.Config) *Server {
 
 func (s *Server) SetDefaultMiddlewares() {
 	s.BaseEchoServer.IPExtractor = echo.ExtractIPFromXFFHeader()
-	s.BaseEchoServer.Use(middleware.Logger())
+	s.BaseEchoServer.Use(slogecho.New(slog.Default()))
 	s.BaseEchoServer.Use(middleware.Recover())
 	s.BaseEchoServer.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     s.cfg.HTTP.CORS.Origins,
