@@ -3,6 +3,8 @@ package usecases
 import (
 	"context"
 	"errors"
+
+	"github.com/taldoflemis/nume/internal/expressions"
 )
 
 var (
@@ -12,14 +14,14 @@ var (
 type DifferenceStrategy interface {
 	Derivative(
 		ctx context.Context,
-		simpleExpr SingleVariableExpr,
+		simpleExpr expressions.SingleVariableExpr,
 		delta float64,
-	) (SingleVariableExpr, error)
+	) (expressions.SingleVariableExpr, error)
 	DoubleDerivative(
 		ctx context.Context,
-		simpleExpr SingleVariableExpr,
+		simpleExpr expressions.SingleVariableExpr,
 		delta float64,
-	) (SingleVariableExpr, error)
+	) (expressions.SingleVariableExpr, error)
 }
 
 var (
@@ -33,9 +35,9 @@ type ForwardDifferenceStrategy struct {
 
 func (*ForwardDifferenceStrategy) Derivative(
 	_ context.Context,
-	simpleExpr SingleVariableExpr,
+	simpleExpr expressions.SingleVariableExpr,
 	delta float64,
-) (SingleVariableExpr, error) {
+) (expressions.SingleVariableExpr, error) {
 	if delta == 0 {
 		return nil, ErrDeltaIsZero
 	}
@@ -49,9 +51,9 @@ func (*ForwardDifferenceStrategy) Derivative(
 
 func (*ForwardDifferenceStrategy) DoubleDerivative(
 	_ context.Context,
-	simpleExpr SingleVariableExpr,
+	simpleExpr expressions.SingleVariableExpr,
 	delta float64,
-) (SingleVariableExpr, error) {
+) (expressions.SingleVariableExpr, error) {
 	if delta == 0 {
 		return nil, ErrDeltaIsZero
 	}
@@ -75,9 +77,9 @@ type BackwardDifferenceStrategy struct {
 
 func (*BackwardDifferenceStrategy) Derivative(
 	_ context.Context,
-	simpleExpr SingleVariableExpr,
+	simpleExpr expressions.SingleVariableExpr,
 	delta float64,
-) (SingleVariableExpr, error) {
+) (expressions.SingleVariableExpr, error) {
 	if delta == 0 {
 		return nil, ErrDeltaIsZero
 	}
@@ -90,9 +92,9 @@ func (*BackwardDifferenceStrategy) Derivative(
 
 func (*BackwardDifferenceStrategy) DoubleDerivative(
 	_ context.Context,
-	simpleExpr SingleVariableExpr,
+	simpleExpr expressions.SingleVariableExpr,
 	delta float64,
-) (SingleVariableExpr, error) {
+) (expressions.SingleVariableExpr, error) {
 	if delta == 0 {
 		return nil, ErrDeltaIsZero
 	}
@@ -114,9 +116,9 @@ type CentralDifferenceStrategy struct {
 
 func (*CentralDifferenceStrategy) Derivative(
 	_ context.Context,
-	simpleExpr SingleVariableExpr,
+	simpleExpr expressions.SingleVariableExpr,
 	delta float64,
-) (SingleVariableExpr, error) {
+) (expressions.SingleVariableExpr, error) {
 	if delta == 0 {
 		return nil, ErrDeltaIsZero
 	}
@@ -130,9 +132,9 @@ func (*CentralDifferenceStrategy) Derivative(
 
 func (*CentralDifferenceStrategy) DoubleDerivative(
 	_ context.Context,
-	simpleExpr SingleVariableExpr,
+	simpleExpr expressions.SingleVariableExpr,
 	delta float64,
-) (SingleVariableExpr, error) {
+) (expressions.SingleVariableExpr, error) {
 	if delta == 0 {
 		return nil, ErrDeltaIsZero
 	}

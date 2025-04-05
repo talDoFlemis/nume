@@ -8,11 +8,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/taldoflemis/nume/internal/expressions"
 )
 
 type testCase struct {
 	name          string
-	inputFunc     SingleVariableExpr
+	inputFunc     expressions.SingleVariableExpr
 	variable      float64
 	delta         float64
 	expectedValue float64
