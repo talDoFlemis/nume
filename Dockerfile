@@ -22,8 +22,6 @@ RUN apk add --no-cache \
 COPY go.mod go.sum /app/
 
 RUN --mount=type=cache,id=s/78f32e04-4dcf-4cb1-9282-97744b29639c-/go/pkg/mod/,target=/go/pkg/mod/ \
-	--mount=type=bind,source=go.sum,target=go.sum \
-	--mount=type=bind,source=go.mod,target=go.mod \
 	go mod download -x
 
 COPY . .
