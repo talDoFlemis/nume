@@ -15,7 +15,7 @@ tasks:
   run:
     desc: "Run the application with frontend"
     cmds:
-      - go run cmd/api/main.go &
+      - go run cmd/web/main.go &
       - pnpm -C ./frontend install
       - pnpm -C ./frontend dev
     silent: true
