@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format-check": "prettier --check ."
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -27,6 +28,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",
+    "simple-icons": "^14.12.0",
     "tailwind-merge": "^3.1.0",
     "tailwindcss": "^4.1.0",
     "tw-animate-css": "^1.2.5",

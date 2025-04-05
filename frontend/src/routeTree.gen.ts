@@ -10,108 +10,108 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as PlaygroundRouteImport } from './routes/playground/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as PlaygroundRootFindingImport } from './routes/playground/root-finding'
-import { Route as PlaygroundInterpolationImport } from './routes/playground/interpolation'
-import { Route as PlaygroundIntegrationImport } from './routes/playground/integration'
-import { Route as PlaygroundDifferentialImport } from './routes/playground/differential'
+import { Route as rootRoute } from "./routes/__root";
+import { Route as PlaygroundRouteImport } from "./routes/playground/route";
+import { Route as IndexImport } from "./routes/index";
+import { Route as PlaygroundRootFindingImport } from "./routes/playground/root-finding";
+import { Route as PlaygroundInterpolationImport } from "./routes/playground/interpolation";
+import { Route as PlaygroundIntegrationImport } from "./routes/playground/integration";
+import { Route as PlaygroundDifferentialImport } from "./routes/playground/differential";
 
 // Create/Update Routes
 
 const PlaygroundRouteRoute = PlaygroundRouteImport.update({
-  id: '/playground',
-  path: '/playground',
+  id: "/playground",
+  path: "/playground",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRoute,
-} as any)
+} as any);
 
 const PlaygroundRootFindingRoute = PlaygroundRootFindingImport.update({
-  id: '/root-finding',
-  path: '/root-finding',
+  id: "/root-finding",
+  path: "/root-finding",
   getParentRoute: () => PlaygroundRouteRoute,
-} as any)
+} as any);
 
 const PlaygroundInterpolationRoute = PlaygroundInterpolationImport.update({
-  id: '/interpolation',
-  path: '/interpolation',
+  id: "/interpolation",
+  path: "/interpolation",
   getParentRoute: () => PlaygroundRouteRoute,
-} as any)
+} as any);
 
 const PlaygroundIntegrationRoute = PlaygroundIntegrationImport.update({
-  id: '/integration',
-  path: '/integration',
+  id: "/integration",
+  path: "/integration",
   getParentRoute: () => PlaygroundRouteRoute,
-} as any)
+} as any);
 
 const PlaygroundDifferentialRoute = PlaygroundDifferentialImport.update({
-  id: '/differential',
-  path: '/differential',
+  id: "/differential",
+  path: "/differential",
   getParentRoute: () => PlaygroundRouteRoute,
-} as any)
+} as any);
 
 // Populate the FileRoutesByPath interface
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/playground': {
-      id: '/playground'
-      path: '/playground'
-      fullPath: '/playground'
-      preLoaderRoute: typeof PlaygroundRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/playground/differential': {
-      id: '/playground/differential'
-      path: '/differential'
-      fullPath: '/playground/differential'
-      preLoaderRoute: typeof PlaygroundDifferentialImport
-      parentRoute: typeof PlaygroundRouteImport
-    }
-    '/playground/integration': {
-      id: '/playground/integration'
-      path: '/integration'
-      fullPath: '/playground/integration'
-      preLoaderRoute: typeof PlaygroundIntegrationImport
-      parentRoute: typeof PlaygroundRouteImport
-    }
-    '/playground/interpolation': {
-      id: '/playground/interpolation'
-      path: '/interpolation'
-      fullPath: '/playground/interpolation'
-      preLoaderRoute: typeof PlaygroundInterpolationImport
-      parentRoute: typeof PlaygroundRouteImport
-    }
-    '/playground/root-finding': {
-      id: '/playground/root-finding'
-      path: '/root-finding'
-      fullPath: '/playground/root-finding'
-      preLoaderRoute: typeof PlaygroundRootFindingImport
-      parentRoute: typeof PlaygroundRouteImport
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/playground": {
+      id: "/playground";
+      path: "/playground";
+      fullPath: "/playground";
+      preLoaderRoute: typeof PlaygroundRouteImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/playground/differential": {
+      id: "/playground/differential";
+      path: "/differential";
+      fullPath: "/playground/differential";
+      preLoaderRoute: typeof PlaygroundDifferentialImport;
+      parentRoute: typeof PlaygroundRouteImport;
+    };
+    "/playground/integration": {
+      id: "/playground/integration";
+      path: "/integration";
+      fullPath: "/playground/integration";
+      preLoaderRoute: typeof PlaygroundIntegrationImport;
+      parentRoute: typeof PlaygroundRouteImport;
+    };
+    "/playground/interpolation": {
+      id: "/playground/interpolation";
+      path: "/interpolation";
+      fullPath: "/playground/interpolation";
+      preLoaderRoute: typeof PlaygroundInterpolationImport;
+      parentRoute: typeof PlaygroundRouteImport;
+    };
+    "/playground/root-finding": {
+      id: "/playground/root-finding";
+      path: "/root-finding";
+      fullPath: "/playground/root-finding";
+      preLoaderRoute: typeof PlaygroundRootFindingImport;
+      parentRoute: typeof PlaygroundRouteImport;
+    };
   }
 }
 
 // Create and export the route tree
 
 interface PlaygroundRouteRouteChildren {
-  PlaygroundDifferentialRoute: typeof PlaygroundDifferentialRoute
-  PlaygroundIntegrationRoute: typeof PlaygroundIntegrationRoute
-  PlaygroundInterpolationRoute: typeof PlaygroundInterpolationRoute
-  PlaygroundRootFindingRoute: typeof PlaygroundRootFindingRoute
+  PlaygroundDifferentialRoute: typeof PlaygroundDifferentialRoute;
+  PlaygroundIntegrationRoute: typeof PlaygroundIntegrationRoute;
+  PlaygroundInterpolationRoute: typeof PlaygroundInterpolationRoute;
+  PlaygroundRootFindingRoute: typeof PlaygroundRootFindingRoute;
 }
 
 const PlaygroundRouteRouteChildren: PlaygroundRouteRouteChildren = {
@@ -119,81 +119,81 @@ const PlaygroundRouteRouteChildren: PlaygroundRouteRouteChildren = {
   PlaygroundIntegrationRoute: PlaygroundIntegrationRoute,
   PlaygroundInterpolationRoute: PlaygroundInterpolationRoute,
   PlaygroundRootFindingRoute: PlaygroundRootFindingRoute,
-}
+};
 
 const PlaygroundRouteRouteWithChildren = PlaygroundRouteRoute._addFileChildren(
   PlaygroundRouteRouteChildren,
-)
+);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/playground': typeof PlaygroundRouteRouteWithChildren
-  '/playground/differential': typeof PlaygroundDifferentialRoute
-  '/playground/integration': typeof PlaygroundIntegrationRoute
-  '/playground/interpolation': typeof PlaygroundInterpolationRoute
-  '/playground/root-finding': typeof PlaygroundRootFindingRoute
+  "/": typeof IndexRoute;
+  "/playground": typeof PlaygroundRouteRouteWithChildren;
+  "/playground/differential": typeof PlaygroundDifferentialRoute;
+  "/playground/integration": typeof PlaygroundIntegrationRoute;
+  "/playground/interpolation": typeof PlaygroundInterpolationRoute;
+  "/playground/root-finding": typeof PlaygroundRootFindingRoute;
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/playground': typeof PlaygroundRouteRouteWithChildren
-  '/playground/differential': typeof PlaygroundDifferentialRoute
-  '/playground/integration': typeof PlaygroundIntegrationRoute
-  '/playground/interpolation': typeof PlaygroundInterpolationRoute
-  '/playground/root-finding': typeof PlaygroundRootFindingRoute
+  "/": typeof IndexRoute;
+  "/playground": typeof PlaygroundRouteRouteWithChildren;
+  "/playground/differential": typeof PlaygroundDifferentialRoute;
+  "/playground/integration": typeof PlaygroundIntegrationRoute;
+  "/playground/interpolation": typeof PlaygroundInterpolationRoute;
+  "/playground/root-finding": typeof PlaygroundRootFindingRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/': typeof IndexRoute
-  '/playground': typeof PlaygroundRouteRouteWithChildren
-  '/playground/differential': typeof PlaygroundDifferentialRoute
-  '/playground/integration': typeof PlaygroundIntegrationRoute
-  '/playground/interpolation': typeof PlaygroundInterpolationRoute
-  '/playground/root-finding': typeof PlaygroundRootFindingRoute
+  __root__: typeof rootRoute;
+  "/": typeof IndexRoute;
+  "/playground": typeof PlaygroundRouteRouteWithChildren;
+  "/playground/differential": typeof PlaygroundDifferentialRoute;
+  "/playground/integration": typeof PlaygroundIntegrationRoute;
+  "/playground/interpolation": typeof PlaygroundInterpolationRoute;
+  "/playground/root-finding": typeof PlaygroundRootFindingRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/playground'
-    | '/playground/differential'
-    | '/playground/integration'
-    | '/playground/interpolation'
-    | '/playground/root-finding'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/playground"
+    | "/playground/differential"
+    | "/playground/integration"
+    | "/playground/interpolation"
+    | "/playground/root-finding";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/playground'
-    | '/playground/differential'
-    | '/playground/integration'
-    | '/playground/interpolation'
-    | '/playground/root-finding'
+    | "/"
+    | "/playground"
+    | "/playground/differential"
+    | "/playground/integration"
+    | "/playground/interpolation"
+    | "/playground/root-finding";
   id:
-    | '__root__'
-    | '/'
-    | '/playground'
-    | '/playground/differential'
-    | '/playground/integration'
-    | '/playground/interpolation'
-    | '/playground/root-finding'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/playground"
+    | "/playground/differential"
+    | "/playground/integration"
+    | "/playground/interpolation"
+    | "/playground/root-finding";
+  fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  PlaygroundRouteRoute: typeof PlaygroundRouteRouteWithChildren
+  IndexRoute: typeof IndexRoute;
+  PlaygroundRouteRoute: typeof PlaygroundRouteRouteWithChildren;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PlaygroundRouteRoute: PlaygroundRouteRouteWithChildren,
-}
+};
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {

@@ -4,6 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import pluginRouter from "@tanstack/eslint-plugin-router";
+import eslint from '@eslint/js';
 
 export default tseslint.config(
   { ignores: ["dist"] },
@@ -12,7 +13,8 @@ export default tseslint.config(
       ...pluginRouter.configs["flat/recommended"],
       js.configs.recommended,
       ...tseslint.configs.strictTypeChecked,
-      ...tseslint.configs.stylisticTypeChecked,
+      eslint.configs.recommended,
+      ...tseslint.configs.recommended,
     ],
     languageOptions: {
       // other options...
@@ -36,6 +38,14 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
 );

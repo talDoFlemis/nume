@@ -1,11 +1,5 @@
-import {
-  ArrowRight,
-  Code,
-  Calculator,
-  LineChart,
-  Zap,
-  Github,
-} from "lucide-react";
+import { ArrowRight, Code, Calculator, LineChart, Zap } from "lucide-react";
+import { siGithub } from "simple-icons";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -63,7 +57,15 @@ function Index() {
                 rel="noreferrer"
               >
                 <div className="bg-background hover:bg-muted hover:text-primary focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
-                  <Github className="h-5 w-5" />
+                  <svg
+                    role="img"
+                    viewBox="0 0 24 24"
+                    className="h-5 w-5"
+                    fill="currentColor"
+                  >
+                    <path d={siGithub.path} />
+                  </svg>
+                  <span className="sr-only">GitHub</span>
                   <span className="sr-only">GitHub</span>
                 </div>
               </a>
@@ -346,7 +348,14 @@ function Index() {
               rel="noreferrer"
             >
               <div className="bg-background hover:bg-muted hover:text-primary focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
-                <Github className="h-5 w-5" />
+                <svg
+                  role="img"
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5"
+                  fill="currentColor"
+                >
+                  <path d={siGithub.path} />
+                </svg>
                 <span className="sr-only">GitHub</span>
               </div>
             </a>

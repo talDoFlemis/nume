@@ -26,10 +26,11 @@ function NumericalMethodsPlayground() {
   const location = useLocation();
   const navigate = useNavigate({ from: "/playground" });
 
-  const currentTab = location.pathname.split("/").pop() || "root-finding";
+  const currentTab = location.pathname.split("/").pop() ?? "root-finding";
 
   React.useEffect(() => {
     if (location.pathname === "/playground") {
+      //eslint-disable-next-line
       navigate({
         to: "/playground/root-finding",
         search: {
@@ -38,7 +39,7 @@ function NumericalMethodsPlayground() {
           initialGuess: 0,
           iterations: 10,
           fn: "x^2 - 4",
-          error: 0.01,
+          error: 0.02,
         },
       });
     }

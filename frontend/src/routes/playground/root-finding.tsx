@@ -72,7 +72,7 @@ function RouteFinding() {
 
     await sleep(1000); // Simulate a delay for the calculation
     setResult(
-      `Method: ${method}\nFunction: ${fn}\nParameters: [delta: ${delta}, ${initialGuess}]\nIterations: ${iterations}\n\nResult would be displayed here with step-by-step calculations and visualization.`,
+      `Method: ${method}\nFunction: ${fn}\nParameters: [delta: ${delta.toString()}, ${initialGuess.toString()}]\nIterations: ${iterations.toString()}\n\nResult would be displayed here with step-by-step calculations and visualization.`,
     );
   };
 
@@ -97,11 +97,13 @@ function RouteFinding() {
     try {
       await handleCalculate(data);
     } catch (error) {
+      console.error("Error during calculation:", error);
+      setResult("An error occurred during calculation.");
     } finally {
       setIsCalculating(false);
     }
 
-    navigate({
+    await navigate({
       search: {
         method,
         fn,
@@ -119,7 +121,14 @@ function RouteFinding() {
         <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-blue-300 opacity-10"></div>
         <CardContent>
           <Form {...form}>
-            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                //eslint-disable-next-line
+                form.handleSubmit(onSubmit)(e);
+              }}
+            >
               <FormField
                 control={form.control}
                 name="method"
@@ -267,7 +276,7 @@ function RouteFinding() {
               </Label>
               <Textarea
                 id="result"
-                value={result || "Results will appear here after calculation"}
+                value={result ?? "Results will appear here after calculation"}
                 readOnly
                 className="min-h-[200px] border-2 border-black font-mono text-sm"
               />
