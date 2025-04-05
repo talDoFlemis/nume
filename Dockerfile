@@ -1,31 +1,54 @@
-FROM golang:1.23-alpine AS build
+FROM node:lts AS frontend_base
+
+FROM frontend_base AS frontend_builder
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 WORKDIR /app
+COPY frontend/ /app
 
-COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
+
+FROM golang:1.24-alpine AS builder
+WORKDIR /app
+
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    ca-certificates
+
+COPY go.mod go.sum /app/
+
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    --mount=type=bind,source=go.sum,target=go.sum \
+    --mount=type=bind,source=go.mod,target=go.mod \
+    go mod download -x
 
 COPY . .
+COPY --from=frontend_builder /app/dist /app/frontend/dist
 
-RUN go build -o main cmd/api/main.go
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    --mount=type=cache,target="/root/.cache/go-build" \
+    CGO_ENABLED=0 GOOS=linux go build -o server  -ldflags '-s -w -extldflags "-static"' ./cmd/web
 
-FROM alpine:3.20.1 AS prod
+FROM ubuntu:oracular AS user
+RUN useradd -u 10001 scratchuser
+
+FROM scratch
 WORKDIR /app
-COPY --from=build /app/main /app/main
-EXPOSE ${PORT}
-CMD ["./main"]
 
 
-FROM node:20 AS frontend_builder
-WORKDIR /frontend
+COPY --from=builder /app/server ./
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=user /etc/passwd /etc/passwd
 
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/. .
-RUN npm run build
+USER scratchuser
+STOPSIGNAL SIGINT
+EXPOSE 8080
 
-FROM node:23-slim AS frontend
-RUN npm install -g serve
-COPY --from=frontend_builder /frontend/dist /app/dist
-EXPOSE 5173
-CMD ["serve", "-s", "/app/dist", "-l", "5173"]
+ENV NUME_APP_ENVIRONMENT="prod"
+
+CMD ["/app/server"]
+
