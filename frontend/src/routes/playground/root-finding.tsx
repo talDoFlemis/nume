@@ -72,7 +72,7 @@ function RouteFinding() {
 
     await sleep(1000); // Simulate a delay for the calculation
     setResult(
-      `Method: ${method}\nFunction: ${fn}\nParameters: [${delta}, ${initialGuess}]\nIterations: ${iterations}\n\nResult would be displayed here with step-by-step calculations and visualization.`,
+      `Method: ${method}\nFunction: ${fn}\nParameters: [delta: ${delta}, ${initialGuess}]\nIterations: ${iterations}\n\nResult would be displayed here with step-by-step calculations and visualization.`,
     );
   };
 

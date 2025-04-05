@@ -15,34 +15,33 @@ jobs:
         node-version: [20]
     defaults:
       run:
-        working-directory: ./frontend
+        working-directory: "frontend"
+
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Install dependencies
-        working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
       - name: Type check
-        working-directory: ./frontend
         run: pnpm type-check
 
       - name: Lint
-        working-directory: ./frontend
         run: pnpm lint
 
       - name: Build
-        working-directory: ./frontend
         run: pnpm build
