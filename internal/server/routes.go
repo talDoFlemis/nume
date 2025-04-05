@@ -1,30 +1,24 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
-func (s *Server) RegisterRoutes() http.Handler {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+func (s *Server) RegisterRoutes() error {
+	// Register the frontend route
+	err := NewFrontendRoute(s.cfg, s.BaseEchoServer)
+	if err != nil {
+		slog.Error("failed to register frontend route", slog.Any("error", err))
+		return err
+	}
 
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"https://*", "http://*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
-		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
+	// Register the API routes
+	s.APIGroup.GET("/hello", s.HelloWorldHandler)
 
-	e.GET("/", s.HelloWorldHandler)
-
-	e.GET("/health", s.healthHandler)
-
-	return e
+	return nil
 }
 
 func (s *Server) HelloWorldHandler(c echo.Context) error {
@@ -33,8 +27,4 @@ func (s *Server) HelloWorldHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
-}
-
-func (s *Server) healthHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, s.db.Health())
 }
