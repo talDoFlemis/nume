@@ -1,0 +1,35 @@
+app:
+  name: nume
+  version: 0.1.0
+  environment: local
+
+http:
+  port: 8888
+  api-prefix: "/api"
+  ip: 0.0.0.0
+  read-timeout-in-seconds: 30
+  write-timeout-in-seconds: 60
+  idle-timeout-in-seconds: 60
+  shutdown-timeout-in-seconds: 60
+
+  cors:
+    origins:
+      - "https://*"
+      - "http://*"
+    methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "OPTIONS"
+    headers:
+      - "Accept"
+      - "Authorization"
+      - "Content-Type"
+      - "X-CSRF-Token"
+
+logger:
+  level: "INFO"
+  enable-json: true
+  file-path: ""
