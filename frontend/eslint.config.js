@@ -3,11 +3,13 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import pluginRouter from '@tanstack/eslint-plugin-router'
 
 export default tseslint.config(
   { ignores: ["dist"] },
   {
     extends: [
+      ...pluginRouter.configs['flat/recommended'],
       js.configs.recommended,
       ...tseslint.configs.strictTypeChecked,
       ...tseslint.configs.stylisticTypeChecked,

@@ -41,7 +41,7 @@ func setupViteProd(cfg configs.HTTPCfg, e *echo.Echo) {
 		Root: "/",
 		// Enable HTML5 mode by forwarding all not-found requests to
 		// root so that SPA (single-page application) can handle the routing.
-		HTML5:      false,
+		HTML5:      true,
 		Browse:     false,
 		IgnoreBase: true,
 		Filesystem: http.FS(frontend.DistDirFS),

@@ -17,7 +17,13 @@ import {
 } from "@/components/ui/card";
 import { ModeToggle } from "@/components/theme/mode-toggle-btn";
 
-export default function LandingPage() {
+import { createFileRoute, Link } from "@tanstack/react-router";
+
+export const Route: unknown = createFileRoute("/")({
+  component: Index,
+});
+
+function Index() {
   return (
     <div className="bg-background flex min-h-screen flex-col scroll-smooth">
       <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 w-full border-b backdrop-blur">
@@ -296,10 +302,10 @@ export default function LandingPage() {
                     methods
                   </p>
                   <Button asChild variant="cartoon">
-                    <a href="/playground">
+                    <Link to="/playground">
                       Launch Playground
                       <ArrowRight className="ml-2 h-4 w-4" />
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </div>
