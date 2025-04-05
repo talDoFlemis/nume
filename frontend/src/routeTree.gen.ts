@@ -14,6 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as PlaygroundRouteImport } from './routes/playground/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as PlaygroundRootFindingImport } from './routes/playground/root-finding'
+import { Route as PlaygroundInterpolationImport } from './routes/playground/interpolation'
+import { Route as PlaygroundIntegrationImport } from './routes/playground/integration'
+import { Route as PlaygroundDifferentialImport } from './routes/playground/differential'
 
 // Create/Update Routes
 
@@ -35,6 +38,24 @@ const PlaygroundRootFindingRoute = PlaygroundRootFindingImport.update({
   getParentRoute: () => PlaygroundRouteRoute,
 } as any)
 
+const PlaygroundInterpolationRoute = PlaygroundInterpolationImport.update({
+  id: '/interpolation',
+  path: '/interpolation',
+  getParentRoute: () => PlaygroundRouteRoute,
+} as any)
+
+const PlaygroundIntegrationRoute = PlaygroundIntegrationImport.update({
+  id: '/integration',
+  path: '/integration',
+  getParentRoute: () => PlaygroundRouteRoute,
+} as any)
+
+const PlaygroundDifferentialRoute = PlaygroundDifferentialImport.update({
+  id: '/differential',
+  path: '/differential',
+  getParentRoute: () => PlaygroundRouteRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -53,6 +74,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaygroundRouteImport
       parentRoute: typeof rootRoute
     }
+    '/playground/differential': {
+      id: '/playground/differential'
+      path: '/differential'
+      fullPath: '/playground/differential'
+      preLoaderRoute: typeof PlaygroundDifferentialImport
+      parentRoute: typeof PlaygroundRouteImport
+    }
+    '/playground/integration': {
+      id: '/playground/integration'
+      path: '/integration'
+      fullPath: '/playground/integration'
+      preLoaderRoute: typeof PlaygroundIntegrationImport
+      parentRoute: typeof PlaygroundRouteImport
+    }
+    '/playground/interpolation': {
+      id: '/playground/interpolation'
+      path: '/interpolation'
+      fullPath: '/playground/interpolation'
+      preLoaderRoute: typeof PlaygroundInterpolationImport
+      parentRoute: typeof PlaygroundRouteImport
+    }
     '/playground/root-finding': {
       id: '/playground/root-finding'
       path: '/root-finding'
@@ -66,10 +108,16 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface PlaygroundRouteRouteChildren {
+  PlaygroundDifferentialRoute: typeof PlaygroundDifferentialRoute
+  PlaygroundIntegrationRoute: typeof PlaygroundIntegrationRoute
+  PlaygroundInterpolationRoute: typeof PlaygroundInterpolationRoute
   PlaygroundRootFindingRoute: typeof PlaygroundRootFindingRoute
 }
 
 const PlaygroundRouteRouteChildren: PlaygroundRouteRouteChildren = {
+  PlaygroundDifferentialRoute: PlaygroundDifferentialRoute,
+  PlaygroundIntegrationRoute: PlaygroundIntegrationRoute,
+  PlaygroundInterpolationRoute: PlaygroundInterpolationRoute,
   PlaygroundRootFindingRoute: PlaygroundRootFindingRoute,
 }
 
@@ -80,12 +128,18 @@ const PlaygroundRouteRouteWithChildren = PlaygroundRouteRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/playground': typeof PlaygroundRouteRouteWithChildren
+  '/playground/differential': typeof PlaygroundDifferentialRoute
+  '/playground/integration': typeof PlaygroundIntegrationRoute
+  '/playground/interpolation': typeof PlaygroundInterpolationRoute
   '/playground/root-finding': typeof PlaygroundRootFindingRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/playground': typeof PlaygroundRouteRouteWithChildren
+  '/playground/differential': typeof PlaygroundDifferentialRoute
+  '/playground/integration': typeof PlaygroundIntegrationRoute
+  '/playground/interpolation': typeof PlaygroundInterpolationRoute
   '/playground/root-finding': typeof PlaygroundRootFindingRoute
 }
 
@@ -93,15 +147,37 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/playground': typeof PlaygroundRouteRouteWithChildren
+  '/playground/differential': typeof PlaygroundDifferentialRoute
+  '/playground/integration': typeof PlaygroundIntegrationRoute
+  '/playground/interpolation': typeof PlaygroundInterpolationRoute
   '/playground/root-finding': typeof PlaygroundRootFindingRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/playground' | '/playground/root-finding'
+  fullPaths:
+    | '/'
+    | '/playground'
+    | '/playground/differential'
+    | '/playground/integration'
+    | '/playground/interpolation'
+    | '/playground/root-finding'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/playground' | '/playground/root-finding'
-  id: '__root__' | '/' | '/playground' | '/playground/root-finding'
+  to:
+    | '/'
+    | '/playground'
+    | '/playground/differential'
+    | '/playground/integration'
+    | '/playground/interpolation'
+    | '/playground/root-finding'
+  id:
+    | '__root__'
+    | '/'
+    | '/playground'
+    | '/playground/differential'
+    | '/playground/integration'
+    | '/playground/interpolation'
+    | '/playground/root-finding'
   fileRoutesById: FileRoutesById
 }
 
@@ -135,8 +211,23 @@ export const routeTree = rootRoute
     "/playground": {
       "filePath": "playground/route.tsx",
       "children": [
+        "/playground/differential",
+        "/playground/integration",
+        "/playground/interpolation",
         "/playground/root-finding"
       ]
+    },
+    "/playground/differential": {
+      "filePath": "playground/differential.tsx",
+      "parent": "/playground"
+    },
+    "/playground/integration": {
+      "filePath": "playground/integration.tsx",
+      "parent": "/playground"
+    },
+    "/playground/interpolation": {
+      "filePath": "playground/interpolation.tsx",
+      "parent": "/playground"
     },
     "/playground/root-finding": {
       "filePath": "playground/root-finding.tsx",

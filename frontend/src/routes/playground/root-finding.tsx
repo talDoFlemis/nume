@@ -1,6 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { LineChart, Calculator } from "lucide-react";
+import { zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,31 +18,99 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-const methods = ["Bisection Method", "Newton-Raphson Method", "Secant Method"];
+type Method = "bisection" | "newthon-raphson" | "secant";
 
-export const Route = createFileRoute('/playground/root-finding')({
+const methods: Method[] = ["bisection", "newthon-raphson", "secant"];
+
+const rootFindingSearchSchema = z.object({
+  method: z.enum(["bisection", "newthon-raphson", "secant"] as const),
+  fn: z.string(),
+  iterations: z.coerce.number().min(1).max(100),
+  delta: z.coerce.number().positive().or(z.number().negative()),
+  initialGuess: z.coerce.number(),
+  error: z.coerce.number().nonnegative().gt(0)
+});
+
+type RootFindingSearchSchema = z.infer<typeof rootFindingSearchSchema>;
+
+export const Route = createFileRoute("/playground/root-finding")({
   component: RouteFinding,
-})
+  validateSearch: zodValidator(rootFindingSearchSchema),
+});
 
 function RouteFinding() {
-  const [selectedMethod, setSelectedMethod] = useState(methods[0]);
-  const [functionInput, setFunctionInput] = useState("x^2 - 4");
-  const [paramA, setParamA] = useState("0");
-  const [paramB, setParamB] = useState("3");
-  const [iterations, setIterations] = useState("10");
+  const search = Route.useSearch();
+  const form = useForm<RootFindingSearchSchema>({
+    resolver: zodResolver(rootFindingSearchSchema),
+    defaultValues: {
+      method: search.method,
+      fn: search.fn,
+      iterations: search.iterations,
+      delta: search.delta,
+      initialGuess: search.initialGuess,
+      error: search.error,
+    },
+  });
+  const navigate = useNavigate({ from: Route.fullPath });
   const [result, setResult] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  const handleCalculate = () => {
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  const handleCalculate = async (data: RootFindingSearchSchema) => {
+    const { method, fn, iterations, delta, initialGuess, error } = data;
+
+    await sleep(1000); // Simulate a delay for the calculation
+    setResult(
+      `Method: ${method}\nFunction: ${fn}\nParameters: [${delta}, ${initialGuess}]\nIterations: ${iterations}\n\nResult would be displayed here with step-by-step calculations and visualization.`,
+    );
+  };
+
+  const convertMethodToString = (method: Method) => {
+    switch (method) {
+      case "bisection":
+        return "Bisection Method";
+      case "newthon-raphson":
+        return "Newton-Raphson Method";
+      case "secant":
+        return "Secant Method";
+      default:
+        return "Unknown Method";
+    }
+  };
+
+  const onSubmit = async (data: RootFindingSearchSchema) => {
+    const { method, fn, iterations, delta, initialGuess, error } = data;
+
     setIsCalculating(true);
-    // Simulate calculation delay
-    setTimeout(() => {
-      setResult(
-        `Method: ${selectedMethod}\nFunction: ${functionInput}\nParameters: [${paramA}, ${paramB}]\nIterations: ${iterations}\n\nResult would be displayed here with step-by-step calculations and visualization.`,
-      );
+
+    try {
+      await handleCalculate(data);
+    } catch (error) {
+    } finally {
       setIsCalculating(false);
-    }, 1000);
+    }
+
+    navigate({
+      search: {
+        method,
+        fn,
+        iterations,
+        delta,
+        initialGuess,
+        error,
+      },
+    });
   };
 
   return (
@@ -46,88 +118,132 @@ function RouteFinding() {
       <Card className="py-6 transition-none">
         <div className="absolute -top-20 -left-20 h-40 w-40 rounded-full bg-blue-300 opacity-10"></div>
         <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="method" className="font-comic">
-                Method
-              </Label>
-              <Select value={selectedMethod} onValueChange={setSelectedMethod}>
-                <SelectTrigger className="border-2 border-black">
-                  <SelectValue placeholder="Select method" />
-                </SelectTrigger>
-                <SelectContent className="group border-card-foreground bg-card relative overflow-hidden rounded-lg border-4 p-2 shadow-[8px_8px_0px_0px]">
-                  {methods.map((method) => (
-                    <SelectItem key={method} value={method}>
-                      {method}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="function" className="font-comic">
-                Function f(x)
-              </Label>
-              <Input
-                id="function"
-                value={functionInput}
-                onChange={(e) => setFunctionInput(e.target.value)}
-                placeholder="e.g. x^2 - 4"
-                className="border-2 border-black"
+          <Form {...form}>
+            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+              <FormField
+                control={form.control}
+                name="method"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="font-comic">Method</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="border-2 border-black">
+                          <SelectValue placeholder="Select method" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="group border-card-foreground bg-card relative overflow-hidden rounded-lg border-4 p-2 shadow-[8px_8px_0px_0px]">
+                        {methods.map((method) => (
+                          <SelectItem key={method} value={method}>
+                            {convertMethodToString(method)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="paramA" className="font-comic">
-                  Parameter A
-                </Label>
-                <Input
-                  id="paramA"
-                  value={paramA}
-                  onChange={(e) => setParamA(e.target.value)}
-                  placeholder="e.g. 0"
-                  className="border-2 border-black"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="paramB" className="font-comic">
-                  Parameter B
-                </Label>
-                <Input
-                  id="paramB"
-                  value={paramB}
-                  onChange={(e) => setParamB(e.target.value)}
-                  placeholder="e.g. 1"
-                  className="border-2 border-black"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="iterations" className="font-comic">
-                Iterations
-              </Label>
-              <Input
-                id="iterations"
-                value={iterations}
-                onChange={(e) => setIterations(e.target.value)}
-                placeholder="e.g. 10"
-                className="border-2 border-black"
+              <FormField
+                control={form.control}
+                name="fn"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="font-comic">Function f(x)</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="function"
+                        placeholder="e.g. x^2 - 4"
+                        className="border-2 border-black"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
+              <FormField
+                control={form.control}
+                name="initialGuess"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="font-comic">Initial Guess</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="initialGuess"
+                        placeholder="e.g. 0"
+                        className="border-2 border-black"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="delta"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="font-comic">Delta</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="delta"
+                        placeholder="e.g. 1"
+                        className="border-2 border-black"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Button
-              onClick={handleCalculate}
-              variant={"cartoon"}
-              className="w-full cursor-pointer"
-              disabled={isCalculating}
-            >
-              {isCalculating ? "Calculating..." : "Calculate"}
-              <Calculator className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+              <FormField
+                control={form.control}
+                name="iterations"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="font-comic">Iterations</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="iterations"
+                        placeholder="e.g. 10"
+                        className="border-2 border-black"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="error"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="font-comic">Error</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="0.01"
+                        className="border-2 border-black"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                variant={"cartoon"}
+                className="w-full cursor-pointer"
+                disabled={isCalculating}
+              >
+                {isCalculating ? "Calculating..." : "Calculate"}
+                <Calculator className="ml-2 h-4 w-4" />
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <div className="absolute -top-2 -left-2 h-6 w-6 rounded-full border-4 border-black bg-white"></div>
         <div className="absolute -right-2 -bottom-2 h-6 w-6 rounded-full border-4 border-black bg-white"></div>
