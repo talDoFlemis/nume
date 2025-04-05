@@ -3,10 +3,12 @@ module github.com/taldoflemis/nume
 go 1.24.1
 
 require (
+	github.com/Pramod-Devireddy/go-exprtk v1.1.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
+	github.com/samber/slog-echo v1.16.1
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.36.0
@@ -64,7 +66,6 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/samber/lo v1.49.1 // indirect
-	github.com/samber/slog-echo v1.16.1 // indirect
 	github.com/shirou/gopsutil/v4 v4.25.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
