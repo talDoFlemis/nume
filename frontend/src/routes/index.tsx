@@ -121,8 +121,8 @@ function Index() {
               applying numerical methods
             </p>
           </div>
-          <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-            <Card>
+          <div className="mx-auto grid grid-cols-1 justify-center gap-4 px-6 md:max-w-[64rem] md:grid-cols-3">
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <div className="bg-primary absolute -top-20 -right-20 h-40 w-40 rounded-full opacity-20"></div>
               <CardHeader className="p-6">
                 <CardTitle>Interactive Visualizations</CardTitle>
@@ -136,7 +136,7 @@ function Index() {
                 <LineChart className="text-primary" />
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <div className="bg-secondary/20 absolute -top-20 -right-20 h-40 w-40 rounded-full"></div>
               <CardHeader className="p-6">
                 <CardTitle>Step-by-Step Solutions</CardTitle>
@@ -149,7 +149,7 @@ function Index() {
                 <Code className="text-secondary h-6 w-6" />
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <div className="bg-accent/20 absolute -top-20 -right-20 h-40 w-40 rounded-full"></div>
               <CardHeader className="p-6">
                 <CardTitle>Real-time Computation</CardTitle>
@@ -177,8 +177,8 @@ function Index() {
               problems
             </p>
           </div>
-          <div className="mx-auto grid justify-center gap-12 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-            <Card>
+          <div className="mx-auto grid grid-cols-1 justify-center gap-12 px-6 md:max-w-[64rem] md:grid-cols-3">
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <CardHeader>
                 <CardTitle>Root Finding</CardTitle>
                 <CardDescription>
@@ -195,7 +195,7 @@ function Index() {
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <CardHeader>
                 <CardTitle>Numerical Integration</CardTitle>
                 <CardDescription>
@@ -212,7 +212,7 @@ function Index() {
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <CardHeader>
                 <CardTitle>Differential Equations</CardTitle>
                 <CardDescription>
@@ -229,7 +229,7 @@ function Index() {
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <CardHeader>
                 <CardTitle>Linear Systems</CardTitle>
                 <CardDescription>
@@ -246,7 +246,7 @@ function Index() {
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <CardHeader>
                 <CardTitle>Interpolation</CardTitle>
                 <CardDescription>
@@ -263,7 +263,7 @@ function Index() {
                 </Button>
               </CardFooter>
             </Card>
-            <Card>
+            <Card className="hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[5px_5px_0px_0px]">
               <CardHeader>
                 <CardTitle>Optimization</CardTitle>
                 <CardDescription>
