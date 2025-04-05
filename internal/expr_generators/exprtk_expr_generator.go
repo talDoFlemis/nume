@@ -16,10 +16,11 @@ type ExprTKExpressionGenerator struct {
 }
 
 var (
+	//nolint:revive
 	_ (interfaces.EvaluableExpressionGenerator) = (*ExprTKExpressionGenerator)(nil)
 )
 
-func (e *ExprTKExpressionGenerator) GenerateSingleVariableExpression(
+func (*ExprTKExpressionGenerator) GenerateSingleVariableExpression(
 	ctx context.Context,
 	node *ast.SingleVariableExpressionNode,
 ) (expressions.SingleVariableExpr, error) {
@@ -32,7 +33,11 @@ func (e *ExprTKExpressionGenerator) GenerateSingleVariableExpression(
 
 	err := exprtkObj.CompileExpression()
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to compile expression", slog.Any("err", err))
+		slog.ErrorContext(
+			ctx,
+			"failed to compile expression",
+			slog.Any("err", err),
+		)
 		return nil, err
 	}
 
