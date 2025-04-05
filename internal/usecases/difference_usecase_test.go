@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type testCase struct {
@@ -82,17 +83,17 @@ func TestDoubleDerivatives(t *testing.T) {
 				t.Run(fmt.Sprintf("%s_%s", strategyName, tt.name), func(t *testing.T) {
 					// t.Parallel()
 					firstDerivative, err := strategy.Derivate(ctx, tt.inputFunc, tt.delta)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					secondDerivative, err := strategy.Derivate(ctx, firstDerivative, tt.delta)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					directSecondDerivative, err := strategy.DoubleDerivate(
 						ctx,
 						tt.inputFunc,
 						tt.delta,
 					)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					// Act
 					result := secondDerivative(tt.variable)
@@ -177,7 +178,7 @@ func TestDifferenceStrategies(t *testing.T) {
 					t.Parallel()
 
 					derivative, err := strategy.Derivate(ctx, tt.inputFunc, tt.delta)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					// Act
 					result := derivative(tt.variable)
