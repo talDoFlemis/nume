@@ -3,36 +3,56 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/taldoflemis/nume/internal/database"
+	"github.com/taldoflemis/nume/configs"
 )
 
 type Server struct {
-	port int
-
-	db database.Service
+	port           int
+	BaseEchoServer *echo.Echo
+	cfg            configs.Config
+	APIGroup       *echo.Group
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
+func NewServer(httpConfig configs.Config) *Server {
+	e := echo.New()
+	api := e.Group(httpConfig.HTTP.ApiPrefix)
 
-		db: database.New(),
+	NewServer := &Server{
+		port:           httpConfig.HTTP.Port,
+		BaseEchoServer: e,
+		cfg:            httpConfig,
+		APIGroup:       api,
 	}
 
-	// Declare Server config
+	return NewServer
+}
+
+func (s *Server) SetDefaultMiddlewares() {
+	s.BaseEchoServer.IPExtractor = echo.ExtractIPFromXFFHeader()
+	s.BaseEchoServer.Use(middleware.Logger())
+	s.BaseEchoServer.Use(middleware.Recover())
+	s.BaseEchoServer.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     s.cfg.HTTP.CORS.Origins,
+		AllowMethods:     s.cfg.HTTP.CORS.Methods,
+		AllowHeaders:     s.cfg.HTTP.CORS.Headers,
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+}
+
+func (s *Server) ToHttpServer() *http.Server {
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		Addr:         fmt.Sprintf(":%d", s.port),
+		Handler:      s.BaseEchoServer,
+		IdleTimeout:  time.Duration(s.cfg.HTTP.IdleTimeoutInSeconds) * time.Second,
+		ReadTimeout:  time.Duration(s.cfg.HTTP.ReadTimeoutInSeconds) * time.Second,
+		WriteTimeout: time.Duration(s.cfg.HTTP.WriteTimeoutInSeconds) * time.Second,
 	}
 
 	return server
