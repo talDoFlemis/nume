@@ -10,85 +10,114 @@
 
 // Import Routes
 
-import { Route as rootRoute } from "./routes/__root";
-import { Route as PlaygroundImport } from "./routes/playground";
-import { Route as IndexImport } from "./routes/index";
+import { Route as rootRoute } from './routes/__root'
+import { Route as PlaygroundRouteImport } from './routes/playground/route'
+import { Route as IndexImport } from './routes/index'
+import { Route as PlaygroundRootFindingImport } from './routes/playground/root-finding'
 
 // Create/Update Routes
 
-const PlaygroundRoute = PlaygroundImport.update({
-  id: "/playground",
-  path: "/playground",
+const PlaygroundRouteRoute = PlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
 
 const IndexRoute = IndexImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRoute,
-} as any);
+} as any)
+
+const PlaygroundRootFindingRoute = PlaygroundRootFindingImport.update({
+  id: '/root-finding',
+  path: '/root-finding',
+  getParentRoute: () => PlaygroundRouteRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/playground": {
-      id: "/playground";
-      path: "/playground";
-      fullPath: "/playground";
-      preLoaderRoute: typeof PlaygroundImport;
-      parentRoute: typeof rootRoute;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/playground': {
+      id: '/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof PlaygroundRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/playground/root-finding': {
+      id: '/playground/root-finding'
+      path: '/root-finding'
+      fullPath: '/playground/root-finding'
+      preLoaderRoute: typeof PlaygroundRootFindingImport
+      parentRoute: typeof PlaygroundRouteImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface PlaygroundRouteRouteChildren {
+  PlaygroundRootFindingRoute: typeof PlaygroundRootFindingRoute
+}
+
+const PlaygroundRouteRouteChildren: PlaygroundRouteRouteChildren = {
+  PlaygroundRootFindingRoute: PlaygroundRootFindingRoute,
+}
+
+const PlaygroundRouteRouteWithChildren = PlaygroundRouteRoute._addFileChildren(
+  PlaygroundRouteRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/playground": typeof PlaygroundRoute;
+  '/': typeof IndexRoute
+  '/playground': typeof PlaygroundRouteRouteWithChildren
+  '/playground/root-finding': typeof PlaygroundRootFindingRoute
 }
 
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/playground": typeof PlaygroundRoute;
+  '/': typeof IndexRoute
+  '/playground': typeof PlaygroundRouteRouteWithChildren
+  '/playground/root-finding': typeof PlaygroundRootFindingRoute
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute;
-  "/": typeof IndexRoute;
-  "/playground": typeof PlaygroundRoute;
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/playground': typeof PlaygroundRouteRouteWithChildren
+  '/playground/root-finding': typeof PlaygroundRootFindingRoute
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/playground";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/playground";
-  id: "__root__" | "/" | "/playground";
-  fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/playground' | '/playground/root-finding'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/playground' | '/playground/root-finding'
+  id: '__root__' | '/' | '/playground' | '/playground/root-finding'
+  fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  PlaygroundRoute: typeof PlaygroundRoute;
+  IndexRoute: typeof IndexRoute
+  PlaygroundRouteRoute: typeof PlaygroundRouteRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PlaygroundRoute: PlaygroundRoute,
-};
+  PlaygroundRouteRoute: PlaygroundRouteRouteWithChildren,
+}
 
 export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
 /* ROUTE_MANIFEST_START
 {
@@ -104,7 +133,14 @@ export const routeTree = rootRoute
       "filePath": "index.tsx"
     },
     "/playground": {
-      "filePath": "playground.tsx"
+      "filePath": "playground/route.tsx",
+      "children": [
+        "/playground/root-finding"
+      ]
+    },
+    "/playground/root-finding": {
+      "filePath": "playground/root-finding.tsx",
+      "parent": "/playground"
     }
   }
 }

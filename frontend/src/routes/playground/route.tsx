@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RootFindingTab } from "@/components/playground/root-finding-tab";
 
 export const Route = createFileRoute("/playground")({
   component: NumericalMethodsPlayground,
@@ -44,13 +43,14 @@ function NumericalMethodsPlayground() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="root-finding">
+          <Tabs>
             <TabsList className="grid w-full grid-cols-4 border-2 border-black p-0">
               <TabsTrigger
                 value="root-finding"
                 className="font-comic data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-full"
+                asChild
               >
-                Root Finding
+                <Link to={"/playground/root-finding"}>Root Finding</Link>
               </TabsTrigger>
               <TabsTrigger
                 value="integration"
@@ -72,7 +72,7 @@ function NumericalMethodsPlayground() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="root-finding">
-              <RootFindingTab />
+              <Outlet />
             </TabsContent>
             <TabsContent value="integration">
               <div>integration</div>

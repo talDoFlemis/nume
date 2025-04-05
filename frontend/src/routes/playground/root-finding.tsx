@@ -1,5 +1,4 @@
-"use client";
-
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from "react";
 import { LineChart, Calculator } from "lucide-react";
 
@@ -16,11 +15,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-interface MethodPlaygroundProps {}
-
 const methods = ["Bisection Method", "Newton-Raphson Method", "Secant Method"];
 
-export function RootFindingTab({}: MethodPlaygroundProps) {
+export const Route = createFileRoute('/playground/root-finding')({
+  component: RouteFinding,
+})
+
+function RouteFinding() {
   const [selectedMethod, setSelectedMethod] = useState(methods[0]);
   const [functionInput, setFunctionInput] = useState("x^2 - 4");
   const [paramA, setParamA] = useState("0");
