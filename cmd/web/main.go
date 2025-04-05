@@ -83,7 +83,7 @@ func main() {
 
 	slog.Info("starting server", slog.String("address", httpServer.Addr))
 	err = httpServer.ListenAndServe()
-	if err != nil && errors.Is(err, http.ErrServerClosed) {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("failed to start server", slog.Any("error", err))
 		panic(err)
 	}
