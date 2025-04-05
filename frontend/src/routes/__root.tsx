@@ -8,4 +8,10 @@ export const Route = createRootRoute({
       <TanStackRouterDevtools />
     </>
   ),
+  notFoundComponent: () => (
+    <div className="p-2">
+      <h1>404</h1>
+      <p>Nao sabo essa pagina</p>
+    </div>
+  ),
 });
