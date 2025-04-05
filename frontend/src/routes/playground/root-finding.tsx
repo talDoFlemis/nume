@@ -37,7 +37,7 @@ const rootFindingSearchSchema = z.object({
   iterations: z.coerce.number().min(1).max(100),
   delta: z.coerce.number().positive().or(z.number().negative()),
   initialGuess: z.coerce.number(),
-  error: z.coerce.number().nonnegative().gt(0)
+  error: z.coerce.number().nonnegative().gt(0),
 });
 
 type RootFindingSearchSchema = z.infer<typeof rootFindingSearchSchema>;
@@ -68,7 +68,7 @@ function RouteFinding() {
     new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleCalculate = async (data: RootFindingSearchSchema) => {
-    const { method, fn, iterations, delta, initialGuess, error } = data;
+    const { method, fn, iterations, delta, initialGuess } = data;
 
     await sleep(1000); // Simulate a delay for the calculation
     setResult(
