@@ -51,7 +51,11 @@ export default function LandingPage() {
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center space-x-2">
               <ModeToggle />
-              <a href="https://github.com/taldoflemis/nume" target="_blank" rel="noreferrer">
+              <a
+                href="https://github.com/taldoflemis/nume"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <div className="bg-background hover:bg-muted hover:text-primary focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
                   <Github className="h-5 w-5" />
                   <span className="sr-only">GitHub</span>
@@ -330,7 +334,11 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <a href="https://github.com/taldoflemis/nume" target="_blank" rel="noreferrer">
+            <a
+              href="https://github.com/taldoflemis/nume"
+              target="_blank"
+              rel="noreferrer"
+            >
               <div className="bg-background hover:bg-muted hover:text-primary focus-visible:ring-ring inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
                 <Github className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
