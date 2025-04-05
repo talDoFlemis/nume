@@ -3,7 +3,6 @@ package usecases
 import (
 	"context"
 	"errors"
-	"math"
 )
 
 var (
@@ -11,12 +10,12 @@ var (
 )
 
 type DifferenceStrategy interface {
-	Derivate(
+	Derivative(
 		ctx context.Context,
 		simpleExpr SingleVariableExpr,
 		delta float64,
 	) (SingleVariableExpr, error)
-	DoubleDerivate(
+	DoubleDerivative(
 		ctx context.Context,
 		simpleExpr SingleVariableExpr,
 		delta float64,
@@ -32,8 +31,8 @@ var (
 type ForwardDifferenceStrategy struct {
 }
 
-func (f *ForwardDifferenceStrategy) Derivate(
-	ctx context.Context,
+func (*ForwardDifferenceStrategy) Derivative(
+	_ context.Context,
 	simpleExpr SingleVariableExpr,
 	delta float64,
 ) (SingleVariableExpr, error) {
@@ -48,8 +47,8 @@ func (f *ForwardDifferenceStrategy) Derivate(
 	}, nil
 }
 
-func (f *ForwardDifferenceStrategy) DoubleDerivate(
-	ctx context.Context,
+func (*ForwardDifferenceStrategy) DoubleDerivative(
+	_ context.Context,
 	simpleExpr SingleVariableExpr,
 	delta float64,
 ) (SingleVariableExpr, error) {
@@ -65,7 +64,7 @@ func (f *ForwardDifferenceStrategy) DoubleDerivate(
 			variable,
 		)
 
-		denominator := math.Pow(delta, 2)
+		denominator := delta * delta
 
 		return numerator / denominator
 	}, nil
@@ -74,8 +73,8 @@ func (f *ForwardDifferenceStrategy) DoubleDerivate(
 type BackwardDifferenceStrategy struct {
 }
 
-func (b *BackwardDifferenceStrategy) Derivate(
-	ctx context.Context,
+func (*BackwardDifferenceStrategy) Derivative(
+	_ context.Context,
 	simpleExpr SingleVariableExpr,
 	delta float64,
 ) (SingleVariableExpr, error) {
@@ -89,8 +88,8 @@ func (b *BackwardDifferenceStrategy) Derivate(
 	}, nil
 }
 
-func (b *BackwardDifferenceStrategy) DoubleDerivate(
-	ctx context.Context,
+func (*BackwardDifferenceStrategy) DoubleDerivative(
+	_ context.Context,
 	simpleExpr SingleVariableExpr,
 	delta float64,
 ) (SingleVariableExpr, error) {
@@ -105,7 +104,7 @@ func (b *BackwardDifferenceStrategy) DoubleDerivate(
 		) + simpleExpr(
 			variable-2*delta,
 		)
-		denominator := math.Pow(delta, 2)
+		denominator := delta * delta
 		return numerator / denominator
 	}, nil
 }
@@ -113,8 +112,8 @@ func (b *BackwardDifferenceStrategy) DoubleDerivate(
 type CentralDifferenceStrategy struct {
 }
 
-func (b *CentralDifferenceStrategy) Derivate(
-	ctx context.Context,
+func (*CentralDifferenceStrategy) Derivative(
+	_ context.Context,
 	simpleExpr SingleVariableExpr,
 	delta float64,
 ) (SingleVariableExpr, error) {
@@ -123,13 +122,14 @@ func (b *CentralDifferenceStrategy) Derivate(
 	}
 	return func(variable float64) float64 {
 		numerator := simpleExpr(variable+delta) - simpleExpr(variable-delta)
+		//nolint:mnd
 		denominator := 2 * delta
 		return numerator / denominator
 	}, nil
 }
 
-func (b *CentralDifferenceStrategy) DoubleDerivate(
-	ctx context.Context,
+func (*CentralDifferenceStrategy) DoubleDerivative(
+	_ context.Context,
 	simpleExpr SingleVariableExpr,
 	delta float64,
 ) (SingleVariableExpr, error) {
@@ -144,7 +144,7 @@ func (b *CentralDifferenceStrategy) DoubleDerivate(
 		) + simpleExpr(
 			variable-delta,
 		)
-		denominator := math.Pow(delta, 2)
+		denominator := delta * delta
 		return numerator / denominator
 	}, nil
 }

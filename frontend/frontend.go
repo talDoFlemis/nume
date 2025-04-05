@@ -16,4 +16,3 @@ var (
 	DistDirFS     = echo.MustSubFS(dist, "dist")
 	DistIndexHTML = echo.MustSubFS(indexHTML, "dist")
 )
-

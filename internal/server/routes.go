@@ -21,7 +21,7 @@ func (s *Server) RegisterRoutes() error {
 	return nil
 }
 
-func (s *Server) HelloWorldHandler(c echo.Context) error {
+func (*Server) HelloWorldHandler(c echo.Context) error {
 	resp := map[string]string{
 		"message": "Hello World",
 	}

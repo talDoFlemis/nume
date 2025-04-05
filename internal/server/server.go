@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	slogecho "github.com/samber/slog-echo"
@@ -23,16 +22,16 @@ type Server struct {
 
 func NewServer(httpConfig configs.Config) *Server {
 	e := echo.New()
-	api := e.Group(httpConfig.HTTP.ApiPrefix)
+	api := e.Group(httpConfig.HTTP.APIPrefix)
 
-	NewServer := &Server{
+	newServer := &Server{
 		port:           httpConfig.HTTP.Port,
 		BaseEchoServer: e,
 		cfg:            httpConfig,
 		APIGroup:       api,
 	}
 
-	return NewServer
+	return newServer
 }
 
 func (s *Server) SetDefaultMiddlewares() {
@@ -44,17 +43,21 @@ func (s *Server) SetDefaultMiddlewares() {
 		AllowMethods:     s.cfg.HTTP.CORS.Methods,
 		AllowHeaders:     s.cfg.HTTP.CORS.Headers,
 		AllowCredentials: true,
-		MaxAge:           300,
+		MaxAge:           s.cfg.HTTP.CORS.MaxAge,
 	}))
 }
 
-func (s *Server) ToHttpServer() *http.Server {
+func (s *Server) ToHTTPServer() *http.Server {
+	idleTimeout := time.Duration(s.cfg.HTTP.IdleTimeoutInSeconds) * time.Second
+	readTimeout := time.Duration(s.cfg.HTTP.ReadTimeoutInSeconds) * time.Second
+	writeTimeout := time.Duration(s.cfg.HTTP.WriteTimeoutInSeconds) *
+		time.Second
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.port),
 		Handler:      s.BaseEchoServer,
-		IdleTimeout:  time.Duration(s.cfg.HTTP.IdleTimeoutInSeconds) * time.Second,
-		ReadTimeout:  time.Duration(s.cfg.HTTP.ReadTimeoutInSeconds) * time.Second,
-		WriteTimeout: time.Duration(s.cfg.HTTP.WriteTimeoutInSeconds) * time.Second,
+		IdleTimeout:  idleTimeout,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
 	}
 
 	return server

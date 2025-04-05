@@ -42,7 +42,7 @@ func TestDoubleDerivatives(t *testing.T) {
 		{
 			name: "d²(x³)/dx² at x=2 should be 12x",
 			inputFunc: func(x float64) float64 {
-				return math.Pow(x, 3)
+				return x * x * x
 			},
 			variable:      2.0,
 			delta:         0.0001,
@@ -50,20 +50,16 @@ func TestDoubleDerivatives(t *testing.T) {
 			tolerance:     0.001,
 		},
 		{
-			name: "d²(sin(x))/dx² at x=0 should be -sin(0)=-0",
-			inputFunc: func(x float64) float64 {
-				return math.Sin(x)
-			},
+			name:          "d²(sin(x))/dx² at x=0 should be -sin(0)=-0",
+			inputFunc:     math.Sin,
 			variable:      0.0,
 			delta:         0.0001,
 			expectedValue: 0.0, // second derivative of sin(x) is -sin(x)
 			tolerance:     0.001,
 		},
 		{
-			name: "d²(e^x)/dx² at x=1 should be e",
-			inputFunc: func(x float64) float64 {
-				return math.Exp(x)
-			},
+			name:          "d²(e^x)/dx² at x=1 should be e",
+			inputFunc:     math.Exp,
 			variable:      1.0,
 			delta:         0.0001,
 			expectedValue: math.E, // second derivative of e^x is e^x
@@ -74,21 +70,16 @@ func TestDoubleDerivatives(t *testing.T) {
 	ctx := context.Background()
 
 	for strategyName, strategy := range strategies {
-		strategyName := strategyName
-		strategy := strategy
-
 		t.Run(strategyName, func(t *testing.T) {
 			for _, tt := range tests {
-				tt := tt
 				t.Run(fmt.Sprintf("%s_%s", strategyName, tt.name), func(t *testing.T) {
-					// t.Parallel()
-					firstDerivative, err := strategy.Derivate(ctx, tt.inputFunc, tt.delta)
+					firstDerivative, err := strategy.Derivative(ctx, tt.inputFunc, tt.delta)
 					require.NoError(t, err)
 
-					secondDerivative, err := strategy.Derivate(ctx, firstDerivative, tt.delta)
+					secondDerivative, err := strategy.Derivative(ctx, firstDerivative, tt.delta)
 					require.NoError(t, err)
 
-					directSecondDerivative, err := strategy.DoubleDerivate(
+					directSecondDerivative, err := strategy.DoubleDerivative(
 						ctx,
 						tt.inputFunc,
 						tt.delta,
@@ -134,20 +125,16 @@ func TestDifferenceStrategies(t *testing.T) {
 			tolerance:     0.001,
 		},
 		{
-			name: "sin(x) derivative at x=0",
-			inputFunc: func(x float64) float64 {
-				return math.Sin(x)
-			},
+			name:          "sin(x) derivative at x=0",
+			inputFunc:     math.Sin,
 			variable:      0.0,
 			delta:         0.0001,
 			expectedValue: 1.0, // derivative of sin(x) is cos(x), at x=0 it's 1
 			tolerance:     0.001,
 		},
 		{
-			name: "e^x derivative at x=1",
-			inputFunc: func(x float64) float64 {
-				return math.Exp(x)
-			},
+			name:          "e^x derivative at x=1",
+			inputFunc:     math.Exp,
 			variable:      1.0,
 			delta:         0.0001,
 			expectedValue: math.E, // derivative of e^x is e^x, at x=1 it's e
@@ -156,7 +143,7 @@ func TestDifferenceStrategies(t *testing.T) {
 		{
 			name: "x^3 derivative at x=2",
 			inputFunc: func(x float64) float64 {
-				return math.Pow(x, 3)
+				return x * x * x
 			},
 			variable:      2.0,
 			delta:         0.0001,
@@ -168,16 +155,10 @@ func TestDifferenceStrategies(t *testing.T) {
 	ctx := context.Background()
 
 	for strategyName, strategy := range strategies {
-		strategyName := strategyName // capture range variable
-		strategy := strategy         // capture range variable
-
 		t.Run(strategyName, func(t *testing.T) {
 			for _, tt := range tests {
-				tt := tt // capture range variable
 				t.Run(fmt.Sprintf("%s_%s", strategyName, tt.name), func(t *testing.T) {
-					t.Parallel()
-
-					derivative, err := strategy.Derivate(ctx, tt.inputFunc, tt.delta)
+					derivative, err := strategy.Derivative(ctx, tt.inputFunc, tt.delta)
 					require.NoError(t, err)
 
 					// Act

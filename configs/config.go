@@ -1,3 +1,4 @@
+//nolint
 package configs
 
 import (
@@ -17,11 +18,12 @@ type CORSCfg struct {
 	Origins []string `mapstructure:"origins" validate:"required,dive,http_url"`
 	Methods []string `mapstructure:"methods" validate:"required,dive,oneof=GET POST PUT PATCH DELETE OPTIONS"`
 	Headers []string `mapstructure:"headers" validate:"required,dive,oneof=Origin Accept Content-Type Authorization X-CSRF-Token"`
+	MaxAge  int      `mapstructure:"max-age" validate:"required,min=1,max=600"`
 }
 
 type HTTPCfg struct {
 	Port                     int     `mapstructure:"port"                        validate:"required,min=1,max=65535"`
-	ApiPrefix                string  `mapstructure:"api-prefix"                  validate:"required"`
+	APIPrefix                string  `mapstructure:"api-prefix"                  validate:"required"`
 	IP                       string  `mapstructure:"ip"                          validate:"required,ip"`
 	CORS                     CORSCfg `mapstructure:"cors"                        validate:"required"`
 	ShutdownTimeoutInSeconds int     `mapstructure:"shutdown-timeout-in-seconds" validate:"required,gt=10,lt=600"`
@@ -34,11 +36,6 @@ type AppCfg struct {
 	Name        string `mapstructure:"name"        validate:"required"`
 	Version     string `mapstructure:"version"     validate:"required"`
 	Environment string `mapstructure:"environment" validate:"required,oneof=develop prod local"`
-}
-
-type IBSUCfg struct {
-	EnableSpoof  bool `mapstructure:"enable-spoof"`
-	MinNFIQScore int  `mapstructure:"min-nfiq-score" validate:"required,min=1,max=100"`
 }
 
 type LoggerCfg struct {

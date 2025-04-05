@@ -13,6 +13,7 @@ http:
   shutdown-timeout-in-seconds: 60
 
   cors:
+    max-age: 300
     origins:
       - "https://*"
       - "http://*"

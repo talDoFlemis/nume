@@ -15,9 +15,16 @@ import (
 	"github.com/taldoflemis/nume/internal/server"
 )
 
-func gracefulShutdown(apiServer *http.Server, done chan bool, shutdownTimeoutInSeconds int) {
+func gracefulShutdown(
+	apiServer *http.Server,
+	done chan bool,
+	shutdownTimeoutInSeconds int,
+) {
 	// Create context that listens for the interrupt signal from the OS.
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	)
 	defer stop()
 
 	// Listen for the interrupt signal.
@@ -66,7 +73,7 @@ func main() {
 		panic(err)
 	}
 
-	httpServer := echoServer.ToHttpServer()
+	httpServer := echoServer.ToHTTPServer()
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)

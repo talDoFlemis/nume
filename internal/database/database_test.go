@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -67,16 +68,20 @@ func TestMain(m *testing.M) {
 }
 
 func TestNew(t *testing.T) {
-	srv := New()
+	srv, err := New()
+	require.NoError(t, err)
+
 	if srv == nil {
 		t.Fatal("New() returned nil")
 	}
 }
 
 func TestHealth(t *testing.T) {
-	srv := New()
+	srv, err := New()
+	require.NoError(t, err)
 
-	stats := srv.Health()
+	stats, err := srv.Health()
+	require.NoError(t, err)
 
 	if stats["status"] != "up" {
 		t.Fatalf("expected status to be up, got %s", stats["status"])
@@ -92,7 +97,8 @@ func TestHealth(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	srv := New()
+	srv, err := New()
+	require.NoError(t, err)
 
 	if srv.Close() != nil {
 		t.Fatalf("expected Close() to return nil")
