@@ -171,43 +171,47 @@ function RouteFinding() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="initialGuess"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="font-comic">Initial Guess</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="initialGuess"
-                        placeholder="e.g. 0"
-                        className="border-2 border-black"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="delta"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="font-comic">Delta</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="delta"
-                        placeholder="e.g. 1"
-                        className="border-2 border-black"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="initialGuess"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="font-comic">
+                        Initial Guess
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          id="initialGuess"
+                          placeholder="e.g. 0"
+                          className="border-2 border-black"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="delta"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="font-comic">Delta</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="delta"
+                          placeholder="e.g. 1"
+                          className="border-2 border-black"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="iterations"
@@ -243,6 +247,7 @@ function RouteFinding() {
                   </FormItem>
                 )}
               />
+              </div>
               <Button
                 variant={"cartoon"}
                 className="w-full cursor-pointer"
