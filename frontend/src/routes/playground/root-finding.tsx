@@ -26,6 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import FunctionPreviewer from "@/components/playground/function-previewer";
 
 type Method = "bisection" | "newthon-raphson" | "secant";
 
@@ -159,6 +160,7 @@ function RouteFinding() {
                 render={({ field }) => (
                   <FormItem className="space-y-2">
                     <FormLabel className="font-comic">Function f(x)</FormLabel>
+                    <FunctionPreviewer />
                     <FormControl>
                       <Input
                         id="function"
@@ -212,41 +214,41 @@ function RouteFinding() {
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="iterations"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="font-comic">Iterations</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="iterations"
-                        placeholder="e.g. 10"
-                        className="border-2 border-black"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="error"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="font-comic">Error</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="0.01"
-                        className="border-2 border-black"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="iterations"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="font-comic">Iterations</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="iterations"
+                          placeholder="e.g. 10"
+                          className="border-2 border-black"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="error"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="font-comic">Error</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="0.01"
+                          className="border-2 border-black"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <Button
                 variant={"cartoon"}

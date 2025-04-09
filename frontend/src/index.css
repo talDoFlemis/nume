@@ -138,3 +138,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/*  Mathquill Styles */
+
+.mq-editable-field {
+  @apply bg-background text-foreground;
+  border: 0!important;
+}
