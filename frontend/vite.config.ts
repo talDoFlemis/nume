@@ -11,6 +11,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  define: {
+    global: "window",
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
