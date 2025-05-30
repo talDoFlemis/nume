@@ -11,6 +11,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
@@ -20,31 +21,27 @@ import (
 
 type DerivativeModel struct {
 	size *tea.WindowSizeMsg
-	// Current focus section (0-4)
+	// Current focus section (0-5)
 	focusedSection int
 
-	// Section 1: Method Selection
-	methodOptions  []string
-	selectedMethod int
-
-	// Section 2: Function Selection
+	// Section 1: Function Selection
 	functionOptions  []string
 	selectedFunction int
 
-	// Section 3: Derivative Settings (Grid layout)
+	// Section 2: Error Order (for polynomial functions)
+	polynomialOrder int // 1-4 (linear to 4th degree)
+
+	// Section 3: Derivative Order
 	derivativeOrder int // 1, 2, or 3
-	philosophy      int // 0: forward, 1: backward, 2: central
 
-	// Section 4: Error and Delta Settings (Grid layout)
-	errorDegree int // 1-4
-	delta       float64
-	deltaInput  string
+	// Section 4: Philosophy (difference method)
+	philosophy int // 0: forward, 1: backward, 2: central
 
-	// Section 5: Algorithm Parameters
-	epsilon       float64
-	maxSteps      int
-	epsilonInput  string
-	maxStepsInput string
+	// Section 5: Inputs (Delta and Test Point inputs)
+	deltaInput     textinput.Model
+	testPointInput textinput.Model
+	delta          float64
+	testPoint      float64
 
 	// Calculation results
 	result          string
@@ -54,6 +51,7 @@ type DerivativeModel struct {
 
 	// Styling
 	renderer *glamour.TermRenderer
+	*Theme
 }
 
 // keyMap defines the keybindings for the main model
@@ -69,6 +67,13 @@ type derivativeKeyMap struct {
 	Enter     key.Binding
 	Space     key.Binding
 	Calculate key.Binding
+	Explain   key.Binding
+	Reset     key.Binding
+	Section1  key.Binding
+	Section2  key.Binding
+	Section3  key.Binding
+	Section4  key.Binding
+	Section5  key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view
@@ -79,9 +84,10 @@ func (k derivativeKeyMap) ShortHelp() []key.Binding {
 // FullHelp returns keybindings for the expanded help view
 func (k derivativeKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.TabD, k.TabI, k.Help},                // first column - navigation
-		{k.Up, k.Down, k.Left, k.Right},         // second column - movement
-		{k.Enter, k.Space, k.Calculate, k.Quit}, // third column - actions
+		{k.TabD, k.TabI, k.Help},                           // first column - navigation
+		{k.Up, k.Down, k.Left, k.Right},                    // second column - movement
+		{k.Section1, k.Section2, k.Section3, k.Section4, k.Section5}, // third column - sections
+		{k.Enter, k.Calculate, k.Explain, k.Reset, k.Quit}, // fourth column - actions
 	}
 }
 
@@ -130,75 +136,65 @@ var derivativeKeys = derivativeKeyMap{
 		key.WithKeys("c"),
 		key.WithHelp("c", "calculate"),
 	),
+	Explain: key.NewBinding(
+		key.WithKeys("x"),
+		key.WithHelp("x", "toggle explanation"),
+	),
+	Reset: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "reset"),
+	),
+	Section1: key.NewBinding(
+		key.WithKeys("1"),
+		key.WithHelp("1", "function selection"),
+	),
+	Section2: key.NewBinding(
+		key.WithKeys("2"),
+		key.WithHelp("2", "error order"),
+	),
+	Section3: key.NewBinding(
+		key.WithKeys("3"),
+		key.WithHelp("3", "derivative order"),
+	),
+	Section4: key.NewBinding(
+		key.WithKeys("4"),
+		key.WithHelp("4", "philosophy"),
+	),
+	Section5: key.NewBinding(
+		key.WithKeys("5"),
+		key.WithHelp("5", "inputs"),
+	),
 }
 
 // GetHelpKeys implements NumeTabContent.
 func (m *DerivativeModel) GetHelpKeys() help.KeyMap {
-	return derivativeKeyMap{
-		Quit: key.NewBinding(
-			key.WithKeys("q", "ctrl+c"),
-			key.WithHelp("q", "quit"),
-		),
-		Help: key.NewBinding(
-			key.WithKeys("?"),
-			key.WithHelp("?", "toggle help"),
-		),
-		TabD: key.NewBinding(
-			key.WithKeys("d"),
-			key.WithHelp("d", "derivatives tab"),
-		),
-		TabI: key.NewBinding(
-			key.WithKeys("i"),
-			key.WithHelp("i", "integrals tab"),
-		),
-		Up: key.NewBinding(
-			key.WithKeys("up", "k"),
-			key.WithHelp("↑/k", "up"),
-		),
-		Down: key.NewBinding(
-			key.WithKeys("down", "j"),
-			key.WithHelp("↓/j", "down"),
-		),
-		Left: key.NewBinding(
-			key.WithKeys("left", "h"),
-			key.WithHelp("←/h", "left"),
-		),
-		Right: key.NewBinding(
-			key.WithKeys("right", "l"),
-			key.WithHelp("→/l", "right"),
-		),
-		Enter: key.NewBinding(
-			key.WithKeys("enter"),
-			key.WithHelp("enter", "select/confirm"),
-		),
-		Space: key.NewBinding(
-			key.WithKeys(" "),
-			key.WithHelp("space", "toggle option"),
-		),
-		Calculate: key.NewBinding(
-			key.WithKeys("c"),
-			key.WithHelp("c", "calculate"),
-		),
-	}
+	return derivativeKeys
 }
 
 var _ (NumeTabContent) = (*DerivativeModel)(nil)
 
-func NewDerivativeModel() *DerivativeModel {
+func NewDerivativeModel(theme *Theme) *DerivativeModel {
 	renderer, _ := glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
 		glamour.WithWordWrap(70),
 	)
 
+	// Create delta input
+	deltaInput := textinput.New()
+	deltaInput.Placeholder = "0.001"
+	deltaInput.CharLimit = 20
+	deltaInput.SetValue("0.001")
+
+	// Create test point input
+	testPointInput := textinput.New()
+	testPointInput.Placeholder = "1.0"
+	testPointInput.CharLimit = 20
+	testPointInput.SetValue("1.0")
+
 	return &DerivativeModel{
 		focusedSection: 0,
-		methodOptions: []string{
-			"Newton Interpolation",
-			"Lagrange Interpolation",
-		},
-		selectedMethod: 0,
 		functionOptions: []string{
-			"Polynomial: f(x) = x³ + 2x² - x + 1",
+			"Polynomial: customizable degree",
 			"Exponential: f(x) = e^x",
 			"Trigonometric: f(x) = sin(x)",
 			"Logarithmic: f(x) = ln(x)",
@@ -206,16 +202,15 @@ func NewDerivativeModel() *DerivativeModel {
 			"Composite: f(x) = sin(x²)",
 		},
 		selectedFunction: 0,
+		polynomialOrder:  3, // default to cubic
 		derivativeOrder:  1,
 		philosophy:       2, // central
-		errorDegree:      2,
+		deltaInput:       deltaInput,
+		testPointInput:   testPointInput,
 		delta:            0.001,
-		deltaInput:       "0.001",
-		epsilon:          1e-6,
-		maxSteps:         100,
-		epsilonInput:     "1e-6",
-		maxStepsInput:    "100",
+		testPoint:        1.0,
 		renderer:         renderer,
+		Theme:            theme,
 	}
 }
 
@@ -224,6 +219,8 @@ func (m *DerivativeModel) Init() tea.Cmd {
 }
 
 func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -243,99 +240,118 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.handleRight(), nil
 		case "enter":
 			return m.handleEnter(), nil
-		case "f", "F":
+		case "c":
 			m.generateResult()
 			return m, nil
-		case "e":
+		case "x":
 			m.showExplanation = !m.showExplanation
 			if m.showExplanation && m.explanation == "" {
 				m.generateExplanation()
 			}
 			return m, nil
 		case "r":
-			return NewDerivativeModel(), nil
+			return NewDerivativeModel(m.Theme), nil
+		case "1":
+			m.focusedSection = 0 // Function Selection
+			return m, nil
+		case "2":
+			m.focusedSection = 1 // Error Order
+			return m, nil
+		case "3":
+			m.focusedSection = 2 // Derivative Order
+			return m, nil
+		case "4":
+			m.focusedSection = 3 // Philosophy
+			return m, nil
+		case "5":
+			m.focusedSection = 4 // Inputs
+			return m, nil
 		}
 
-		// Handle input for delta, epsilon, and maxSteps
-		if m.focusedSection == 3 || m.focusedSection == 4 {
-			return m.handleTextInput(msg.String()), nil
+		// Handle input for text inputs
+		if m.focusedSection == 4 {
+			var cmd tea.Cmd
+			m.deltaInput, cmd = m.deltaInput.Update(msg)
+			if val, err := strconv.ParseFloat(m.deltaInput.Value(), 64); err == nil {
+				m.delta = val
+			}
+			cmds = append(cmds, cmd)
+
+			m.testPointInput, cmd = m.testPointInput.Update(msg)
+			if val, err := strconv.ParseFloat(m.testPointInput.Value(), 64); err == nil {
+				m.testPoint = val
+			}
+			cmds = append(cmds, cmd)
 		}
 	}
 
-	return m, nil
+	return m, tea.Batch(cmds...)
 }
 
 func (m *DerivativeModel) handleUp() *DerivativeModel {
 	switch m.focusedSection {
-	case 0: // Method selection
-		if m.selectedMethod > 0 {
-			m.selectedMethod--
-		}
-	case 1: // Function selection
+	case 0: // Function selection
 		if m.selectedFunction > 0 {
 			m.selectedFunction--
 		}
-	case 2: // Derivative order or philosophy
-		// Focus on derivative order (left side)
+	case 1: // Error order
+		if m.polynomialOrder > 1 {
+			m.polynomialOrder--
+		}
+	case 2: // Derivative order
 		if m.derivativeOrder > 1 {
 			m.derivativeOrder--
 		}
-	case 3: // Error degree
-		if m.errorDegree > 1 {
-			m.errorDegree--
+	case 3: // Philosophy
+		if m.philosophy > 0 {
+			m.philosophy--
 		}
-	case 4: // Max steps
-		if steps, err := strconv.Atoi(m.maxStepsInput); err == nil && steps > 10 {
-			m.maxSteps = steps - 10
-			m.maxStepsInput = strconv.Itoa(m.maxSteps)
-		}
+	case 4: // Inputs - focus delta input
+		m.deltaInput.Focus()
+		m.testPointInput.Blur()
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleDown() *DerivativeModel {
 	switch m.focusedSection {
-	case 0: // Method selection
-		if m.selectedMethod < len(m.methodOptions)-1 {
-			m.selectedMethod++
-		}
-	case 1: // Function selection
+	case 0: // Function selection
 		if m.selectedFunction < len(m.functionOptions)-1 {
 			m.selectedFunction++
+		}
+	case 1: // Error order
+		if m.polynomialOrder < 4 {
+			m.polynomialOrder++
 		}
 	case 2: // Derivative order
 		if m.derivativeOrder < 3 {
 			m.derivativeOrder++
 		}
-	case 3: // Error degree
-		if m.errorDegree < 4 {
-			m.errorDegree++
+	case 3: // Philosophy
+		if m.philosophy < 2 {
+			m.philosophy++
 		}
-	case 4: // Max steps
-		if steps, err := strconv.Atoi(m.maxStepsInput); err == nil {
-			m.maxSteps = steps + 10
-			m.maxStepsInput = strconv.Itoa(m.maxSteps)
-		}
+	case 4: // Inputs - focus test point input
+		m.deltaInput.Blur()
+		m.testPointInput.Focus()
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleLeft() *DerivativeModel {
 	switch m.focusedSection {
-	case 2: // Philosophy (right side of grid)
-		if m.philosophy > 0 {
-			m.philosophy--
-		}
+	case 4: // Inputs - focus delta input
+		m.deltaInput.Focus()
+		m.testPointInput.Blur()
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleRight() *DerivativeModel {
 	switch m.focusedSection {
-	case 2: // Philosophy (right side of grid)
-		if m.philosophy < 2 {
-			m.philosophy++
-		}
+	case 4: // Inputs - focus test point input
+		m.deltaInput.Blur()
+		m.testPointInput.Focus()
 	}
 	return m
 }
@@ -346,219 +362,210 @@ func (m *DerivativeModel) handleEnter() *DerivativeModel {
 	return m
 }
 
-func (m *DerivativeModel) handleTextInput(input string) *DerivativeModel {
-	switch m.focusedSection {
-	case 3: // Delta input
-		switch input {
-		case "backspace":
-			if len(m.deltaInput) > 0 {
-				m.deltaInput = m.deltaInput[:len(m.deltaInput)-1]
-			}
-		default:
-			if len(input) == 1 &&
-				(input[0] >= '0' && input[0] <= '9' || input[0] == '.' || input[0] == 'e' || input[0] == '-') {
-				m.deltaInput += input
-				if val, err := strconv.ParseFloat(m.deltaInput, 64); err == nil {
-					m.delta = val
-				}
-			}
-		}
-	case 4: // Epsilon input
-		switch input {
-		case "backspace":
-			if len(m.epsilonInput) > 0 {
-				m.epsilonInput = m.epsilonInput[:len(m.epsilonInput)-1]
-			}
-		default:
-			if len(input) == 1 &&
-				(input[0] >= '0' && input[0] <= '9' || input[0] == '.' || input[0] == 'e' || input[0] == '-') {
-				m.epsilonInput += input
-				if val, err := strconv.ParseFloat(m.epsilonInput, 64); err == nil {
-					m.epsilon = val
-				}
-			}
-		}
+func (m *DerivativeModel) View() string {
+	// Create two-column layout: left side navigation, right side content
+	leftWidth := 40
+	rightWidth := 60
+
+	// Left side - Section navigation
+	leftContent := m.renderSectionNavigation()
+
+	// Right side - Markdown content based on focused section
+	rightContent := m.renderSectionContent()
+
+	// Join horizontally
+	content := lipgloss.JoinHorizontal(
+		lipgloss.Top,
+		lipgloss.NewStyle().Width(leftWidth).Render(leftContent),
+		lipgloss.NewStyle().Width(rightWidth).Render(rightContent),
+	)
+
+	// Results section at the bottom if available
+	if m.result != "" {
+		resultsSection := m.renderResults()
+		content = lipgloss.JoinVertical(lipgloss.Left, content, "", resultsSection)
 	}
-	return m
+
+	return content
 }
 
-func (m *DerivativeModel) View() string {
+func (m *DerivativeModel) renderSectionNavigation() string {
 	var sections []string
 
-	// Section 1: Method Selection
-	sections = append(sections, m.renderMethodSelection())
-
-	// Section 2: Function Selection
-	sections = append(sections, m.renderFunctionSelection())
-
-	// Section 3: Derivative Settings (Grid)
-	sections = append(sections, m.renderDerivativeSettings())
-
-	// Section 4: Error and Delta Settings (Grid)
-	sections = append(sections, m.renderErrorDeltaSettings())
-
-	// Section 5: Algorithm Parameters
-	sections = append(sections, m.renderAlgorithmParameters())
-
-	// Results section
-	if m.result != "" {
-		sections = append(sections, m.renderResults())
+	// Section names with tilde formatting
+	sectionNames := []string{
+		"Function Selection",
+		"Error Order",
+		"Derivative Order",
+		"Philosophy",
+		"Inputs",
 	}
 
-	// Join all sections
-	content := lipgloss.JoinVertical(lipgloss.Left, sections...)
+	for i, name := range sectionNames {
+		var style lipgloss.Style
+		if i == m.focusedSection {
+			// Use focused title color from theme
+			style = lipgloss.NewStyle().
+				Foreground(m.Theme.Focused.Title.GetForeground()).
+				Bold(true)
+		} else {
+			style = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#666666"))
+		}
 
-	// Center the entire content
-	return lipgloss.Place(
-		80, 24,
-		lipgloss.Center, lipgloss.Top,
-		content,
-	)
+		// Format with tildes
+		formattedName := fmt.Sprintf("~ %s ~", name)
+		sections = append(sections, style.Render(formattedName))
+
+		// Add content based on section
+		switch i {
+		case 0: // Function Selection
+			for j, function := range m.functionOptions {
+				prefix := "  "
+				if j == m.selectedFunction {
+					prefix = "▶ "
+				}
+				functionName := strings.Split(function, ":")[0]
+				sections = append(sections, fmt.Sprintf("%s%s", prefix, functionName))
+			}
+		case 1: // Error Order
+			orderNames := []string{"Linear", "Quadratic", "Cubic", "Quartic"}
+			for j, orderName := range orderNames {
+				prefix := "  "
+				if j+1 == m.polynomialOrder {
+					prefix = "▶ "
+				}
+				sections = append(sections, fmt.Sprintf("%s%s (degree %d)", prefix, orderName, j+1))
+			}
+		case 2: // Derivative Order
+			orderOptions := []string{"First", "Second", "Third"}
+			for j, order := range orderOptions {
+				prefix := "  "
+				if j+1 == m.derivativeOrder {
+					prefix = "▶ "
+				}
+				sections = append(sections, fmt.Sprintf("%s%s", prefix, order))
+			}
+		case 3: // Philosophy
+			philosophyOptions := []string{"Forward", "Backward", "Central"}
+			for j, phil := range philosophyOptions {
+				prefix := "  "
+				if j == m.philosophy {
+					prefix = "▶ "
+				}
+				sections = append(sections, fmt.Sprintf("%s%s", prefix, phil))
+			}
+		case 4: // Inputs
+			sections = append(sections, fmt.Sprintf("  Delta: %s", m.deltaInput.View()))
+			sections = append(sections, fmt.Sprintf("  Test Point: %s", m.testPointInput.View()))
+		}
+		sections = append(sections, "") // Add spacing
+	}
+
+	return strings.Join(sections, "\n")
 }
 
-func (m *DerivativeModel) renderMethodSelection() string {
-	style := m.getSectionStyle(0)
-	title := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		Render("1. Method Selection")
-	desc := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666")).
-		Render("Choose the interpolation method for derivative calculation")
+func (m *DerivativeModel) renderSectionContent() string {
+	var content string
 
-	options := ""
-	for i, method := range m.methodOptions {
-		prefix := "  "
-		if i == m.selectedMethod {
-			prefix = "▶ "
-		}
-		options += fmt.Sprintf("%s%s\n", prefix, method)
+	switch m.focusedSection {
+	case 0: // Function Selection
+		content = `# Function Selection (Press 1)
+
+Choose the mathematical function for derivative calculation:
+
+## Available Functions
+
+- **Polynomial**: Customizable polynomial functions (linear to quartic)
+- **Exponential**: f(x) = e^x
+- **Trigonometric**: f(x) = sin(x)
+- **Logarithmic**: f(x) = ln(x)
+- **Rational**: f(x) = 1/x
+- **Composite**: f(x) = sin(x²)
+
+Use ↑/↓ arrows to select a function type.
+`
+	case 1: // Error Order
+		content = `# Error Order (Press 2)
+
+Choose the degree of the polynomial function:
+
+## Available Orders
+
+- **Linear (degree 1)**: f(x) = 2x + 1
+- **Quadratic (degree 2)**: f(x) = x² + 2x + 1  
+- **Cubic (degree 3)**: f(x) = x³ + 2x² - x + 1
+- **Quartic (degree 4)**: f(x) = x⁴ + x³ + 2x² - x + 1
+
+Use ↑/↓ arrows to select the polynomial degree.
+
+**Note**: This setting only applies to polynomial functions.`
+	case 2: // Derivative Order
+		content = `# Derivative Order (Press 3)
+
+Select the order of derivative to calculate:
+
+## Available Orders
+
+- **First derivative**: f'(x) - Rate of change
+- **Second derivative**: f''(x) - Concavity and acceleration  
+- **Third derivative**: f'''(x) - Rate of change of acceleration
+
+Use ↑/↓ arrows to select the derivative order.
+
+## Mathematical Notation
+- First: f'(x) or df/dx
+- Second: f''(x) or d²f/dx²
+- Third: f'''(x) or d³f/dx³`
+	case 3: // Philosophy
+		content = `# Philosophy (Press 4)
+
+Choose the finite difference method for numerical differentiation:
+
+## Available Methods
+
+- **Forward Difference**: Uses f(x+h) - f(x)
+  - Good for left boundary points
+  - First-order accurate: O(h)
+
+- **Backward Difference**: Uses f(x) - f(x-h)  
+  - Good for right boundary points
+  - First-order accurate: O(h)
+
+- **Central Difference**: Uses f(x+h) - f(x-h)
+  - Most accurate for interior points
+  - Second-order accurate: O(h²)
+
+Use ↑/↓ arrows to select the difference method.
+
+**Recommended**: Central difference for most applications.`
+	case 4: // Inputs
+		content = `# Inputs (Press 5)
+
+Configure the numerical calculation parameters:
+
+## Delta (h)
+The step size for finite difference calculation.
+- Smaller values: More accurate but prone to numerical errors
+- Larger values: Less accurate but more stable
+- Typical range: 1e-6 to 1e-2
+- **Default**: 0.001
+
+## Test Point
+The x-coordinate where the derivative is evaluated.
+- Choose based on your function's domain
+- Avoid singularities (e.g., x=0 for 1/x)
+- **Default**: 1.0
+
+Use ←/→ arrows to switch between input fields.
+Press **Enter** or **c** to calculate the derivative.`
 	}
 
-	return style.Render(title + "\n" + desc + "\n\n" + options)
-}
-
-func (m *DerivativeModel) renderFunctionSelection() string {
-	style := m.getSectionStyle(1)
-	title := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		Render("2. Function Selection")
-	desc := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666")).
-		Render("Select the mathematical function to differentiate")
-
-	options := ""
-	for i, function := range m.functionOptions {
-		prefix := "  "
-		if i == m.selectedFunction {
-			prefix = "▶ "
-		}
-		options += fmt.Sprintf("%s%s\n", prefix, function)
+	// Render with glamour
+	if rendered, err := m.renderer.Render(content); err == nil {
+		return rendered
 	}
-
-	return style.Render(title + "\n" + desc + "\n\n" + options)
-}
-
-func (m *DerivativeModel) renderDerivativeSettings() string {
-	style := m.getSectionStyle(2)
-	title := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		Render("3. Derivative Configuration")
-	desc := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666")).
-		Render("Configure derivative order and difference method")
-
-	// Left side: Derivative Order
-	orderOptions := []string{"First (f')", "Second (f'')", "Third (f''')"}
-	orderSection := "Derivative Order:\n"
-	for i, order := range orderOptions {
-		prefix := "  "
-		if i+1 == m.derivativeOrder {
-			prefix = "▶ "
-		}
-		orderSection += fmt.Sprintf("%s%s\n", prefix, order)
-	}
-
-	// Right side: Philosophy
-	philosophyOptions := []string{"Forward", "Backward", "Central"}
-	philosophySection := "Difference Method:\n"
-	for i, phil := range philosophyOptions {
-		prefix := "  "
-		if i == m.philosophy {
-			prefix = "▶ "
-		}
-		philosophySection += fmt.Sprintf("%s%s\n", prefix, phil)
-	}
-
-	// Grid layout
-	grid := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		lipgloss.NewStyle().Width(30).Render(orderSection),
-		lipgloss.NewStyle().Width(30).Render(philosophySection),
-	)
-
-	return style.Render(title + "\n" + desc + "\n\n" + grid)
-}
-
-func (m *DerivativeModel) renderErrorDeltaSettings() string {
-	style := m.getSectionStyle(3)
-	title := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		Render("4. Numerical Parameters")
-	desc := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666")).
-		Render("Set error degree and step size (delta)")
-
-	// Left side: Error Degree
-	errorSection := "Error Degree:\n"
-	for i := 1; i <= 4; i++ {
-		prefix := "  "
-		if i == m.errorDegree {
-			prefix = "▶ "
-		}
-		errorSection += fmt.Sprintf("%sO(h^%d)\n", prefix, i)
-	}
-
-	// Right side: Delta
-	deltaSection := fmt.Sprintf("Delta (h): %s\n", m.deltaInput)
-	if m.focusedSection == 3 {
-		deltaSection += "Type to edit..."
-	}
-
-	// Grid layout
-	grid := lipgloss.JoinHorizontal(
-		lipgloss.Top,
-		lipgloss.NewStyle().Width(30).Render(errorSection),
-		lipgloss.NewStyle().Width(30).Render(deltaSection),
-	)
-
-	return style.Render(title + "\n" + desc + "\n\n" + grid)
-}
-
-func (m *DerivativeModel) renderAlgorithmParameters() string {
-	style := m.getSectionStyle(4)
-	title := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		Render("5. Algorithm Parameters")
-	desc := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666")).
-		Render("Configure convergence criteria and iteration limits")
-
-	content := fmt.Sprintf(
-		"Epsilon (ε): %s\nMax Steps: %s\n\nPress F to calculate, E for explanation, R to reset",
-		m.epsilonInput,
-		m.maxStepsInput,
-	)
-
-	if m.focusedSection == 4 {
-		content += "\nType to edit epsilon or use arrows for max steps"
-	}
-
-	return style.Render(title + "\n" + desc + "\n\n" + content)
+	return content
 }
 
 func (m *DerivativeModel) renderResults() string {
@@ -566,7 +573,7 @@ func (m *DerivativeModel) renderResults() string {
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("#7D56F4")).
 		Padding(1).
-		Width(70)
+		Width(100)
 
 	content := "RESULTS:\n\n" + m.result
 
@@ -580,25 +587,6 @@ func (m *DerivativeModel) renderResults() string {
 	}
 
 	return style.Render(content)
-}
-
-func (m *DerivativeModel) getSectionStyle(sectionIndex int) lipgloss.Style {
-	style := lipgloss.NewStyle().
-		Padding(1).
-		Width(70).
-		Align(lipgloss.Left)
-
-	if m.focusedSection == sectionIndex {
-		style = style.
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("#7D56F4"))
-	} else {
-		style = style.
-			Border(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("#444444"))
-	}
-
-	return style
 }
 
 func (m *DerivativeModel) generateResult() {
@@ -648,46 +636,38 @@ func (m *DerivativeModel) generateResult() {
 		return
 	}
 
-	// Evaluate at appropriate test points
-	testPoint := m.getTestPoint()
-	derivativeValue := derivativeExpr(testPoint)
+	// Evaluate at test point
+	derivativeValue := derivativeExpr(m.testPoint)
 
-	methodName := m.methodOptions[m.selectedMethod]
 	functionName := strings.Split(m.functionOptions[m.selectedFunction], ":")[0]
 	philosophyName := []string{"Forward", "Backward", "Central"}[m.philosophy]
 
-	m.result = fmt.Sprintf(`Method: %s
-Function: %s
+	// Add polynomial order info if polynomial is selected
+	functionDescription := functionName
+	if m.selectedFunction == 0 { // Polynomial
+		orderNames := []string{"Linear", "Quadratic", "Cubic", "Quartic"}
+		if m.polynomialOrder >= 1 && m.polynomialOrder <= 4 {
+			functionDescription = fmt.Sprintf("%s (%s - degree %d)", functionName, orderNames[m.polynomialOrder-1], m.polynomialOrder)
+		}
+	}
+
+	m.result = fmt.Sprintf(`Function: %s
 Derivative Order: %s
 Philosophy: %s difference
-Error Degree: O(h^%d)
 Delta (h): %.6f
-Epsilon (ε): %.2e
-Max Steps: %d
 
 Test point: x = %.1f
 Derivative value: %.6f`,
-		methodName,
-		functionName,
+		functionDescription,
 		m.getDerivativeOrderText(),
 		philosophyName,
-		m.errorDegree,
 		m.delta,
-		m.epsilon,
-		m.maxSteps,
-		testPoint,
+		m.testPoint,
 		derivativeValue)
 }
 
 func (m *DerivativeModel) getTestPoint() float64 {
-	switch m.selectedFunction {
-	case 3: // Logarithmic
-		return 2.0 // Avoid x=1 where ln(x)=0 and ensure x>0
-	case 4: // Rational
-		return 2.0 // Avoid x=0 for 1/x
-	default:
-		return 1.0
-	}
+	return m.testPoint
 }
 
 func (m *DerivativeModel) getDerivativeOrderText() string {
@@ -706,9 +686,28 @@ func (m *DerivativeModel) getDerivativeOrderText() string {
 func (m *DerivativeModel) setupFunctionExpression() {
 	// Define function expressions based on selected function
 	switch m.selectedFunction {
-	case 0: // Polynomial
-		m.functionExpr = func(x float64) float64 {
-			return x*x*x + 2*x*x - x + 1
+	case 0: // Polynomial - use the selected polynomial order
+		switch m.polynomialOrder {
+		case 1: // Linear: f(x) = 2x + 1
+			m.functionExpr = func(x float64) float64 {
+				return 2*x + 1
+			}
+		case 2: // Quadratic: f(x) = x² + 2x + 1
+			m.functionExpr = func(x float64) float64 {
+				return x*x + 2*x + 1
+			}
+		case 3: // Cubic: f(x) = x³ + 2x² - x + 1
+			m.functionExpr = func(x float64) float64 {
+				return x*x*x + 2*x*x - x + 1
+			}
+		case 4: // Quartic: f(x) = x⁴ + x³ + 2x² - x + 1
+			m.functionExpr = func(x float64) float64 {
+				return x*x*x*x + x*x*x + 2*x*x - x + 1
+			}
+		default: // Default to cubic
+			m.functionExpr = func(x float64) float64 {
+				return x*x*x + 2*x*x - x + 1
+			}
 		}
 	case 1: // Exponential
 		m.functionExpr = func(x float64) float64 {
@@ -758,24 +757,18 @@ func (m *DerivativeModel) generateExplanation() {
 The %s difference method for numerical differentiation.
 
 ## Configuration
-- **Method**: %s
 - **Function**: %s  
 - **Order**: %s
-- **Error**: O(h^%d)
+- **Delta**: %.6f
 
 ## Parameters
-- **Delta**: %.6f
-- **Epsilon**: %.2e
-- **Max Steps**: %d
+- **Test Point**: %.1f
 `,
 			strings.Title(philosophyName),
 			philosophyName,
-			m.methodOptions[m.selectedMethod],
 			strings.Split(m.functionOptions[m.selectedFunction], ":")[0],
 			m.getDerivativeOrderText(),
-			m.errorDegree,
 			m.delta,
-			m.epsilon,
-			m.maxSteps)
+			m.testPoint)
 	}
 }

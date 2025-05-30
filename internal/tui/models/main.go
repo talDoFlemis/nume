@@ -47,7 +47,7 @@ type tabItem struct {
 }
 
 func NewMainModel(theme *Theme) MainModel {
-	derivateModel := NewDerivativeModel()
+	derivateModel := NewDerivativeModel(theme)
 	integralModel := NewIntegralModel()
 
 	return MainModel{
@@ -216,11 +216,11 @@ func (m MainModel) View() string {
 
 	// Content area
 	var content string
-	// if m.activeTab == 0 {
-	// 	content = m.derivativeModel.View()
-	// } else {
-	// 	content = m.integralModel.View()
-	// }
+	if m.activeTab == DerivativeTab {
+		content = m.derivativeModel.View()
+	} else {
+		content = m.integralModel.View()
+	}
 
 	// Layout
 	flexBox := lipgloss.JoinVertical(
