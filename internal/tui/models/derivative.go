@@ -347,12 +347,6 @@ func (m *DerivativeModel) View() string {
 		lipgloss.NewStyle().Width(rightWidth).Render(rightContent),
 	)
 
-	// Results section at the bottom if available
-	if m.result != "" {
-		resultsSection := m.renderResults()
-		content = lipgloss.JoinVertical(lipgloss.Left, content, "", resultsSection)
-	}
-
 	return content
 }
 
@@ -550,6 +544,15 @@ Execute the derivative calculation with the configured parameters:
 - **Test Point**: ` + fmt.Sprintf("%.1f", m.testPoint) + `
 
 Press **Enter** on the Calculate button to run the calculation.`
+
+		// Add results section if available
+		if m.result != "" {
+			content += `
+
+# Result
+
+` + m.result
+		}
 	}
 
 	// Render with glamour
@@ -557,27 +560,6 @@ Press **Enter** on the Calculate button to run the calculation.`
 		return rendered
 	}
 	return content
-}
-
-func (m *DerivativeModel) renderResults() string {
-	style := lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("#7D56F4")).
-		Padding(1).
-		Width(100)
-
-	content := "RESULTS:\n\n" + m.result
-
-	if m.showExplanation && m.explanation != "" {
-		content += "\n\nEXPLANATION:\n"
-		if rendered, err := m.renderer.Render(m.explanation); err == nil {
-			content += rendered
-		} else {
-			content += m.explanation
-		}
-	}
-
-	return style.Render(content)
 }
 
 func (m *DerivativeModel) generateResult() {
@@ -623,38 +605,14 @@ func (m *DerivativeModel) generateResult() {
 	}
 
 	if err != nil {
-		m.result = fmt.Sprintf("Error calculating derivative: %v", err)
+		m.result = m.Theme.Focused.ErrorMessage.Render(fmt.Sprintf("Error calculating derivative: %v", err))
 		return
 	}
 
 	// Evaluate at test point
 	derivativeValue := derivativeExpr(m.testPoint)
 
-	functionName := strings.Split(m.functionOptions[m.selectedFunction], ":")[0]
-	philosophyName := []string{"Forward", "Backward", "Central"}[m.philosophy]
-
-	// Add polynomial order info if polynomial is selected
-	functionDescription := functionName
-	if m.selectedFunction == 0 { // Polynomial
-		orderNames := []string{"Linear", "Quadratic", "Cubic", "Quartic"}
-		if m.polynomialOrder >= 1 && m.polynomialOrder <= 4 {
-			functionDescription = fmt.Sprintf("%s (%s - degree %d)", functionName, orderNames[m.polynomialOrder-1], m.polynomialOrder)
-		}
-	}
-
-	m.result = fmt.Sprintf(`Function: %s
-Derivative Order: %s
-Philosophy: %s difference
-Delta (h): %.6f
-
-Test point: x = %.1f
-Derivative value: %.6f`,
-		functionDescription,
-		m.getDerivativeOrderText(),
-		philosophyName,
-		m.delta,
-		m.testPoint,
-		derivativeValue)
+	m.result = fmt.Sprintf(`%.6f`,derivativeValue)
 }
 
 func (m *DerivativeModel) getTestPoint() float64 {
