@@ -21,6 +21,12 @@ type CORSCfg struct {
 	MaxAge  int      `mapstructure:"max-age" validate:"required,min=1,max=600"`
 }
 
+type SSHCfg struct {
+	Port        int    `mapstructure:"port"          validate:"required,min=1,max=65535"`
+	Host        string `mapstructure:"host"          validate:"required,ip"`
+	HostKeyPath string `mapstructure:"host-key-path" validate:"required"`
+}
+
 type HTTPCfg struct {
 	Port                     int     `mapstructure:"port"                        validate:"required,min=1,max=65535"`
 	APIPrefix                string  `mapstructure:"api-prefix"                  validate:"required"`
@@ -44,6 +50,7 @@ type LoggerCfg struct {
 }
 
 type Config struct {
+	SSH    SSHCfg    `mapstructure:"ssh"    validate:"required"`
 	HTTP   HTTPCfg   `mapstructure:"http"   validate:"required"`
 	App    AppCfg    `mapstructure:"app"    validate:"required"`
 	Logger LoggerCfg `mapstructure:"logger" validate:"required"`
