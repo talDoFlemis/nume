@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"math"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -20,7 +20,6 @@ import (
 )
 
 type DerivativeModel struct {
-	size *tea.WindowSizeMsg
 	// Current focus section (0-5)
 	focusedSection int
 
@@ -42,9 +41,6 @@ type DerivativeModel struct {
 	testPointInput textinput.Model
 	delta          float64
 	testPoint      float64
-
-	// Calculate button
-	calculateButtonFocused bool
 
 	// Calculation results
 	result          string
@@ -390,7 +386,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		if i == m.focusedSection {
 			// Use focused title color from theme
 			style = lipgloss.NewStyle().
-				Foreground(m.Theme.Focused.Title.GetForeground()).
+				Foreground(m.Focused.Title.GetForeground()).
 				Bold(true)
 		} else {
 			style = lipgloss.NewStyle().
@@ -405,9 +401,9 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		switch i {
 		case 0: // Function Selection
 			for j, function := range m.functionOptions {
-				style := m.Theme.Blurred.UnselectedPrefix
+				style := m.Blurred.UnselectedPrefix
 				if j == m.selectedFunction {
-					style = m.Theme.Focused.SelectedPrefix
+					style = m.Focused.SelectedPrefix
 				}
 				functionName := strings.Split(function, ":")[0]
 				sections = append(sections, style.Render(functionName))
@@ -415,9 +411,9 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		case 1: // Error Order
 			orderNames := []string{"Linear", "Quadratic", "Cubic", "Quartic"}
 			for j, orderName := range orderNames {
-				style := m.Theme.Blurred.UnselectedPrefix
+				style := m.Blurred.UnselectedPrefix
 				if j+1 == m.polynomialOrder {
-					style = m.Theme.Focused.SelectedPrefix
+					style = m.Focused.SelectedPrefix
 				}
 				sections = append(
 					sections,
@@ -427,18 +423,18 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		case 2: // Derivative Order
 			orderOptions := []string{"First", "Second", "Third"}
 			for j, order := range orderOptions {
-				style := m.Theme.Blurred.UnselectedPrefix
+				style := m.Blurred.UnselectedPrefix
 				if j+1 == m.derivativeOrder {
-					style = m.Theme.Focused.SelectedPrefix
+					style = m.Focused.SelectedPrefix
 				}
 				sections = append(sections, style.Render(order))
 			}
 		case 3: // Philosophy
 			philosophyOptions := []string{"Forward", "Backward", "Central"}
 			for j, phil := range philosophyOptions {
-				style := m.Theme.Blurred.UnselectedPrefix
+				style := m.Blurred.UnselectedPrefix
 				if j == m.philosophy {
-					style = m.Theme.Focused.SelectedPrefix
+					style = m.Focused.SelectedPrefix
 				}
 				sections = append(sections, style.Render(phil))
 			}
@@ -449,9 +445,9 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 			// Create a styled button
 			var buttonStyle lipgloss.Style
 			if i == m.focusedSection {
-				buttonStyle = m.Theme.Focused.FocusedButton
+				buttonStyle = m.Focused.FocusedButton
 			} else {
-				buttonStyle = m.Theme.Focused.BlurredButton
+				buttonStyle = m.Focused.BlurredButton
 			}
 			button := buttonStyle.Render(" CALCULATE ")
 			sections = append(sections, fmt.Sprintf("  %s", button))
@@ -626,7 +622,7 @@ func (m *DerivativeModel) generateResult() {
 	}
 
 	if err != nil {
-		m.result = m.Theme.Focused.ErrorMessage.Render(
+		m.result = m.Focused.ErrorMessage.Render(
 			fmt.Sprintf("Error calculating derivative: %v", err),
 		)
 		return
@@ -636,10 +632,6 @@ func (m *DerivativeModel) generateResult() {
 	derivativeValue := derivativeExpr(m.testPoint)
 
 	m.result = fmt.Sprintf(`%.6f`, derivativeValue)
-}
-
-func (m *DerivativeModel) getTestPoint() float64 {
-	return m.testPoint
 }
 
 func (m *DerivativeModel) getDerivativeOrderText() string {
@@ -675,9 +667,7 @@ func (m *DerivativeModel) setupFunctionExpression() {
 			return math.Sin(2 * x)
 		}
 	case 3: // Hyperbolic
-		m.functionExpr = func(x float64) float64 {
-			return math.Cosh(x)
-		}
+		m.functionExpr = math.Cosh
 	}
 }
 
@@ -686,7 +676,7 @@ func (m *DerivativeModel) generateExplanation() {
 	filename := fmt.Sprintf("%s_difference.md", philosophyName)
 	explanationPath := filepath.Join("internal", "tui", "views", "explanations", filename)
 
-	if content, err := ioutil.ReadFile(explanationPath); err == nil {
+	if content, err := os.ReadFile(explanationPath); err == nil {
 		m.explanation = string(content)
 	} else {
 		// Fallback explanation
@@ -703,7 +693,7 @@ The %s difference method for numerical differentiation.
 ## Parameters
 - **Test Point**: %.1f
 `,
-			strings.Title(philosophyName),
+			strings.ToUpper(philosophyName[:1])+philosophyName[1:],
 			philosophyName,
 			strings.Split(m.functionOptions[m.selectedFunction], ":")[0],
 			m.getDerivativeOrderText(),
