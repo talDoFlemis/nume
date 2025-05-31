@@ -42,7 +42,7 @@ type DerivativeModel struct {
 	testPointInput textinput.Model
 	delta          float64
 	testPoint      float64
-	
+
 	// Calculate button
 	calculateButtonFocused bool
 
@@ -59,20 +59,20 @@ type DerivativeModel struct {
 
 // keyMap defines the keybindings for the main model
 type derivativeKeyMap struct {
-	Quit      key.Binding
-	Help      key.Binding
-	TabD      key.Binding
-	TabI      key.Binding
+	Quit             key.Binding
+	Help             key.Binding
+	TabD             key.Binding
+	TabI             key.Binding
 	CycleNextSection key.Binding
 	CyclePrevSection key.Binding
-	Up        key.Binding
-	Down      key.Binding
-	Left      key.Binding
-	Right     key.Binding
-	Enter     key.Binding
-	Space     key.Binding
-	Explain   key.Binding
-	Reset     key.Binding
+	Up               key.Binding
+	Down             key.Binding
+	Left             key.Binding
+	Right            key.Binding
+	Enter            key.Binding
+	Space            key.Binding
+	Explain          key.Binding
+	Reset            key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view
@@ -83,10 +83,10 @@ func (k derivativeKeyMap) ShortHelp() []key.Binding {
 // FullHelp returns keybindings for the expanded help view
 func (k derivativeKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.TabD, k.TabI, k.Help},                           // first column - navigation
-		{k.Up, k.Down, k.Left, k.Right},                    // second column - movement
-		{k.CycleNextSection, k.CyclePrevSection},           // third column - sections
-		{k.Enter, k.Explain, k.Reset, k.Quit},              // fourth column - actions
+		{k.TabD, k.TabI, k.Help},                 // first column - navigation
+		{k.Up, k.Down, k.Left, k.Right},          // second column - movement
+		{k.CycleNextSection, k.CyclePrevSection}, // third column - sections
+		{k.Enter, k.Explain, k.Reset, k.Quit},    // fourth column - actions
 	}
 }
 
@@ -173,12 +173,10 @@ func NewDerivativeModel(theme *Theme) *DerivativeModel {
 	return &DerivativeModel{
 		focusedSection: 0,
 		functionOptions: []string{
-			"Polynomial: customizable degree",
-			"Exponential: f(x) = e^x",
-			"Trigonometric: f(x) = sin(x)",
-			"Logarithmic: f(x) = ln(x)",
-			"Rational: f(x) = 1/x",
-			"Composite: f(x) = sin(x²)",
+			"Polynomial: f(x) = x^4 - 2x² + 5x - 1",
+			"Exponential: f(x) = e^3x",
+			"Trigonometric: f(x) = sin(2x)",
+			"Hyperbolic: f(x) = cosh(x)",
 		},
 		selectedFunction: 0,
 		polynomialOrder:  3, // default to cubic
@@ -204,7 +202,7 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, derivativeKeys.CycleNextSection):
-			m.focusedSection = (m.focusedSection + 1) % 6  // 6 sections now including calculate button
+			m.focusedSection = (m.focusedSection + 1) % 6 // 6 sections now including calculate button
 			return m, nil
 		case key.Matches(msg, derivativeKeys.CyclePrevSection):
 			m.focusedSection = (m.focusedSection - 1 + 6) % 6
@@ -421,7 +419,10 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 				if j+1 == m.polynomialOrder {
 					style = m.Theme.Focused.SelectedPrefix
 				}
-				sections = append(sections, style.Render(fmt.Sprintf("%s (degree %d)", orderName, j+1)))
+				sections = append(
+					sections,
+					style.Render(fmt.Sprintf("%s (degree %d)", orderName, j+1)),
+				)
 			}
 		case 2: // Derivative Order
 			orderOptions := []string{"First", "Second", "Third"}
@@ -472,30 +473,26 @@ Choose the mathematical function for derivative calculation:
 
 ## Available Functions
 
-- **Polynomial**: Customizable polynomial functions (linear to quartic)
-- **Exponential**: f(x) = e^x
-- **Trigonometric**: f(x) = sin(x)
-- **Logarithmic**: f(x) = ln(x)
-- **Rational**: f(x) = 1/x
-- **Composite**: f(x) = sin(x²)
+- **Polynomial**: f(x) = x^4 - 2x² + 5x - 1
+- **Exponential**: f(x) = e^3x
+- **Trigonometric**: f(x) = sin(2x)
+- **Hyperbolic**: f(x) = cosh(x)
 
 Use ↑/↓ arrows to select a function type.
 `
 	case 1: // Error Order
 		content = `# Error Order
 
-Choose the degree of the polynomial function:
+Choose the degree of the error for the approximation:
 
 ## Available Orders
 
-- **Linear (degree 1)**: f(x) = 2x + 1
-- **Quadratic (degree 2)**: f(x) = x² + 2x + 1  
-- **Cubic (degree 3)**: f(x) = x³ + 2x² - x + 1
-- **Quartic (degree 4)**: f(x) = x⁴ + x³ + 2x² - x + 1
+- **Linear (degree 1)**: O(h)
+- **Quadratic (degree 2)**: O(h²)
+- **Cubic (degree 3)**: O(h³)
+- **Quartic (degree 4)**: O(h⁴)
 
-Use ↑/↓ arrows to select the polynomial degree.
-
-**Note**: This setting only applies to polynomial functions.`
+Use ↑/↓ arrows to select the approximation degree.`
 	case 2: // Derivative Order
 		content = `# Derivative Order
 
@@ -629,14 +626,16 @@ func (m *DerivativeModel) generateResult() {
 	}
 
 	if err != nil {
-		m.result = m.Theme.Focused.ErrorMessage.Render(fmt.Sprintf("Error calculating derivative: %v", err))
+		m.result = m.Theme.Focused.ErrorMessage.Render(
+			fmt.Sprintf("Error calculating derivative: %v", err),
+		)
 		return
 	}
 
 	// Evaluate at test point
 	derivativeValue := derivativeExpr(m.testPoint)
 
-	m.result = fmt.Sprintf(`%.6f`,derivativeValue)
+	m.result = fmt.Sprintf(`%.6f`, derivativeValue)
 }
 
 func (m *DerivativeModel) getTestPoint() float64 {
@@ -657,60 +656,27 @@ func (m *DerivativeModel) getDerivativeOrderText() string {
 }
 
 func (m *DerivativeModel) setupFunctionExpression() {
+	if m.selectedFunction < 0 || m.selectedFunction >= len(m.functionOptions) {
+		panic(fmt.Sprintf("Invalid function selection: %d", m.selectedFunction))
+	}
+
 	// Define function expressions based on selected function
 	switch m.selectedFunction {
-	case 0: // Polynomial - use the selected polynomial order
-		switch m.polynomialOrder {
-		case 1: // Linear: f(x) = 2x + 1
-			m.functionExpr = func(x float64) float64 {
-				return 2*x + 1
-			}
-		case 2: // Quadratic: f(x) = x² + 2x + 1
-			m.functionExpr = func(x float64) float64 {
-				return x*x + 2*x + 1
-			}
-		case 3: // Cubic: f(x) = x³ + 2x² - x + 1
-			m.functionExpr = func(x float64) float64 {
-				return x*x*x + 2*x*x - x + 1
-			}
-		case 4: // Quartic: f(x) = x⁴ + x³ + 2x² - x + 1
-			m.functionExpr = func(x float64) float64 {
-				return x*x*x*x + x*x*x + 2*x*x - x + 1
-			}
-		default: // Default to cubic
-			m.functionExpr = func(x float64) float64 {
-				return x*x*x + 2*x*x - x + 1
-			}
+	case 0: // Polynomial
+		m.functionExpr = func(x float64) float64 {
+			return math.Pow(x, 4) - 2*x*x + 5*x - 1
 		}
 	case 1: // Exponential
 		m.functionExpr = func(x float64) float64 {
-			return math.Exp(x)
+			return math.Exp(3 * x)
 		}
 	case 2: // Trigonometric
 		m.functionExpr = func(x float64) float64 {
-			return math.Sin(x)
+			return math.Sin(2 * x)
 		}
-	case 3: // Logarithmic
+	case 3: // Hyperbolic
 		m.functionExpr = func(x float64) float64 {
-			if x <= 0 {
-				return math.NaN()
-			}
-			return math.Log(x)
-		}
-	case 4: // Rational
-		m.functionExpr = func(x float64) float64 {
-			if x == 0 {
-				return math.NaN()
-			}
-			return 1.0 / x
-		}
-	case 5: // Composite
-		m.functionExpr = func(x float64) float64 {
-			return math.Sin(x * x)
-		}
-	default:
-		m.functionExpr = func(x float64) float64 {
-			return x*x*x + 2*x*x - x + 1
+			return math.Cosh(x)
 		}
 	}
 }
