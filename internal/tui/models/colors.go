@@ -16,6 +16,7 @@ type Theme struct {
 	Blurred        FieldStyles
 	Focused        FieldStyles
 	Help           help.Styles
+	Renderer *lipgloss.Renderer
 }
 
 // FormStyles are the styles for a form.
@@ -84,34 +85,36 @@ const (
 
 // ThemeBase returns a new base theme with general styles to be inherited by
 // other themes.
-func ThemeBase() *Theme {
+func ThemeBase(renderer *lipgloss.Renderer) *Theme {
 	var t Theme
 
-	t.Form.Base = lipgloss.NewStyle()
-	t.Group.Base = lipgloss.NewStyle()
-	t.FieldSeparator = lipgloss.NewStyle().SetString("\n\n")
+	t.Renderer = renderer
 
-	button := lipgloss.NewStyle().
+	t.Form.Base = renderer.NewStyle()
+	t.Group.Base = renderer.NewStyle()
+	t.FieldSeparator = renderer.NewStyle().SetString("\n\n")
+
+	button := renderer.NewStyle().
 		Padding(buttonPaddingVertical, buttonPaddingHorizontal).
 		MarginRight(1)
 
 	// Focused styles.
-	t.Focused.Base = lipgloss.NewStyle().
+	t.Focused.Base = renderer.NewStyle().
 		PaddingLeft(1).
 		BorderStyle(lipgloss.ThickBorder()).
 		BorderLeft(true)
 	t.Focused.Card = t.Focused.Base
-	t.Focused.ErrorIndicator = lipgloss.NewStyle().SetString(" *")
-	t.Focused.ErrorMessage = lipgloss.NewStyle().SetString(" *")
-	t.Focused.SelectSelector = lipgloss.NewStyle().SetString("> ")
-	t.Focused.NextIndicator = lipgloss.NewStyle().MarginLeft(1).SetString("→")
-	t.Focused.PrevIndicator = lipgloss.NewStyle().MarginRight(1).SetString("←")
-	t.Focused.MultiSelectSelector = lipgloss.NewStyle().SetString("> ")
-	t.Focused.SelectedPrefix = lipgloss.NewStyle().SetString("▶ ")
-	t.Focused.UnselectedPrefix = lipgloss.NewStyle().SetString("  ")
+	t.Focused.ErrorIndicator = renderer.NewStyle().SetString(" *")
+	t.Focused.ErrorMessage = renderer.NewStyle().SetString(" *")
+	t.Focused.SelectSelector = renderer.NewStyle().SetString("> ")
+	t.Focused.NextIndicator = renderer.NewStyle().MarginLeft(1).SetString("→")
+	t.Focused.PrevIndicator = renderer.NewStyle().MarginRight(1).SetString("←")
+	t.Focused.MultiSelectSelector = renderer.NewStyle().SetString("> ")
+	t.Focused.SelectedPrefix = renderer.NewStyle().SetString("▶ ")
+	t.Focused.UnselectedPrefix = renderer.NewStyle().SetString("  ")
 	t.Focused.FocusedButton = button.Foreground(lipgloss.Color("0")).Background(lipgloss.Color("7"))
 	t.Focused.BlurredButton = button.Foreground(lipgloss.Color("7")).Background(lipgloss.Color("0"))
-	t.Focused.TextInput.Placeholder = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+	t.Focused.TextInput.Placeholder = renderer.NewStyle().Foreground(lipgloss.Color("8"))
 
 	t.Help = help.New().Styles
 
@@ -119,16 +122,16 @@ func ThemeBase() *Theme {
 	t.Blurred = t.Focused
 	t.Blurred.Base = t.Blurred.Base.BorderStyle(lipgloss.HiddenBorder())
 	t.Blurred.Card = t.Blurred.Base
-	t.Blurred.MultiSelectSelector = lipgloss.NewStyle().SetString("  ")
-	t.Blurred.NextIndicator = lipgloss.NewStyle()
-	t.Blurred.PrevIndicator = lipgloss.NewStyle()
+	t.Blurred.MultiSelectSelector = renderer.NewStyle().SetString("  ")
+	t.Blurred.NextIndicator = renderer.NewStyle()
+	t.Blurred.PrevIndicator = renderer.NewStyle()
 
 	return &t
 }
 
 // ThemeCatppuccin returns a new theme based on the Catppuccin color scheme.
-func ThemeCatppuccin() *Theme {
-	t := ThemeBase()
+func ThemeCatppuccin(renderer *lipgloss.Renderer) *Theme {
+	t := ThemeBase(renderer)
 
 	light := catppuccin.Latte
 	dark := catppuccin.Mocha
