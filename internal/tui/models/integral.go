@@ -11,27 +11,6 @@ type IntegralModel struct {
 	// Placeholder for future integral functionality
 }
 
-// keyMap defines the keybindings for the main model
-type integralKeyMap struct {
-	Quit             key.Binding
-	Help             key.Binding
-	TabD             key.Binding
-	TabI             key.Binding
-}
-
-// ShortHelp returns keybindings to be shown in the mini help view
-func (k integralKeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.Quit}
-}
-
-// FullHelp returns keybindings for the expanded help view
-func (k integralKeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{
-		{k.TabD, k.TabI, k.Help},                 // first column - navigation
-		{k.Quit},    // Second column - actions
-	}
-}
-
 var integralKeys = derivativeKeyMap{
 	Quit: key.NewBinding(
 		key.WithKeys("q", "ctrl+c"),
