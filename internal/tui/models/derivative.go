@@ -254,18 +254,30 @@ func (m *DerivativeModel) handleUp() *DerivativeModel {
 	case 0: // Function selection
 		if m.selectedFunction > 0 {
 			m.selectedFunction--
+		} else {
+			// Cycle to the end
+			m.selectedFunction = len(m.functionOptions) - 1
 		}
 	case 1: // Error order
 		if m.polynomialOrder > 1 {
 			m.polynomialOrder--
+		} else {
+			// Cycle to the highest order (quartic = 4)
+			m.polynomialOrder = 4
 		}
 	case 2: // Derivative order
 		if m.derivativeOrder > 1 {
 			m.derivativeOrder--
+		} else {
+			// Cycle to the highest order (third = 3)
+			m.derivativeOrder = 3
 		}
 	case 3: // Philosophy
 		if m.philosophy > 0 {
 			m.philosophy--
+		} else {
+			// Cycle to the last philosophy (central = 2)
+			m.philosophy = 2
 		}
 	case 4: // Arguments - focus delta input
 		m.deltaInput.Focus()
@@ -280,18 +292,30 @@ func (m *DerivativeModel) handleDown() *DerivativeModel {
 	case 0: // Function selection
 		if m.selectedFunction < len(m.functionOptions)-1 {
 			m.selectedFunction++
+		} else {
+			// Cycle to the beginning
+			m.selectedFunction = 0
 		}
 	case 1: // Error order
 		if m.polynomialOrder < 4 {
 			m.polynomialOrder++
+		} else {
+			// Cycle to the lowest order (linear = 1)
+			m.polynomialOrder = 1
 		}
 	case 2: // Derivative order
 		if m.derivativeOrder < 3 {
 			m.derivativeOrder++
+		} else {
+			// Cycle to the lowest order (first = 1)
+			m.derivativeOrder = 1
 		}
 	case 3: // Philosophy
 		if m.philosophy < 2 {
 			m.philosophy++
+		} else {
+			// Cycle to the first philosophy (forward = 0)
+			m.philosophy = 0
 		}
 	case 4: // Arguments - focus test point input
 		m.deltaInput.Blur()
