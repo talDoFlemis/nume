@@ -15,12 +15,6 @@ const (
 	IntegralTab   Tab = 1
 )
 
-type GlobalState struct {
-}
-
-var globalState = &GlobalState{
-}
-
 type MainModel struct {
 	tabs            []string
 	activeTab       Tab
@@ -34,16 +28,6 @@ type MainModel struct {
 
 type NumeTabContent interface {
 	GetHelpKeys() help.KeyMap
-}
-
-type instruction struct {
-	shortcut    string
-	description string
-}
-
-type tabItem struct {
-	shortcut string
-	name     string
 }
 
 func NewMainModel(theme *Theme) MainModel {
@@ -145,14 +129,14 @@ func (m MainModel) View() string {
 			m.size.Width, m.size.Height,
 			lipgloss.Center, lipgloss.Center,
 			lipgloss.NewStyle().
-				Foreground(m.Theme.Focused.Base.GetBorderBottomForeground()).
+				Foreground(m.Focused.Base.GetBorderBottomForeground()).
 				Width(m.size.Width-2).
 				Height(m.size.Height-2).
 				Padding(2).
 				AlignHorizontal(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
 				BorderStyle(lipgloss.RoundedBorder()).
-				BorderForeground(m.Theme.Focused.Base.GetBorderBottomForeground()).
+				BorderForeground(m.Focused.Base.GetBorderBottomForeground()).
 				Border(lipgloss.NormalBorder()).
 				Render(fmt.Sprintf(
 					"Please resize your terminal to at least %dx%d for optimal experience.",
@@ -164,11 +148,11 @@ func (m MainModel) View() string {
 	// Render tabs
 	var tabsRender []string
 	for i, tab := range m.tabs {
-		style := m.Theme.Blurred.BlurredButton
+		style := m.Blurred.BlurredButton
 		isActive := i == int(m.activeTab)
 		if isActive {
-			style = m.Theme.Focused.FocusedButton
-		} 
+			style = m.Focused.FocusedButton
+		}
 
 		tabsRender = append(tabsRender, style.Render(tab))
 	}
@@ -178,16 +162,16 @@ func (m MainModel) View() string {
 	// Header with instructions
 	header := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(m.Theme.Focused.Title.GetForeground()).
+		Foreground(m.Focused.Title.GetForeground()).
 		Render("NUME - Numerical Methods Calculator")
 
 	// Use the help view directly
 	helpView := m.help.View(m.keys)
-	
+
 	// Style the help view
 	styledHelp := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), true, false, false, false).
-		BorderForeground(m.Theme.Focused.Base.GetBorderBottomForeground()).
+		BorderForeground(m.Focused.Base.GetBorderBottomForeground()).
 		Render(helpView)
 
 	// Content area
