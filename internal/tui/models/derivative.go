@@ -37,7 +37,7 @@ type DerivativeModel struct {
 	// Section 4: Philosophy (difference method)
 	philosophy int // 0: forward, 1: backward, 2: central
 
-	// Section 5: Inputs (Delta and Test Point inputs)
+	// Section 5: Arguments (Delta and Test Point inputs)
 	deltaInput     textinput.Model
 	testPointInput textinput.Model
 	delta          float64
@@ -60,6 +60,8 @@ type derivativeKeyMap struct {
 	Help      key.Binding
 	TabD      key.Binding
 	TabI      key.Binding
+	CycleNextSection key.Binding
+	CyclePrevSection key.Binding
 	Up        key.Binding
 	Down      key.Binding
 	Left      key.Binding
@@ -69,11 +71,11 @@ type derivativeKeyMap struct {
 	Calculate key.Binding
 	Explain   key.Binding
 	Reset     key.Binding
-	Section1  key.Binding
-	Section2  key.Binding
-	Section3  key.Binding
-	Section4  key.Binding
-	Section5  key.Binding
+	Section1 key.Binding
+	Section2 key.Binding
+	Section3 key.Binding
+	Section4 key.Binding
+	Section5 key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view
@@ -108,6 +110,14 @@ var derivativeKeys = derivativeKeyMap{
 		key.WithKeys("i"),
 		key.WithHelp("i", "integrals tab"),
 	),
+	CycleNextSection: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "cycle to next section"),
+	),
+	CyclePrevSection: key.NewBinding(
+		key.WithKeys("shift+tab"),
+		key.WithHelp("shift+tab", "cycle to previous section"),
+	),
 	Up: key.NewBinding(
 		key.WithKeys("up", "k"),
 		key.WithHelp("↑/k", "up"),
@@ -128,10 +138,6 @@ var derivativeKeys = derivativeKeyMap{
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "select/confirm"),
 	),
-	Space: key.NewBinding(
-		key.WithKeys(" "),
-		key.WithHelp("space", "toggle option"),
-	),
 	Calculate: key.NewBinding(
 		key.WithKeys("c"),
 		key.WithHelp("c", "calculate"),
@@ -145,24 +151,24 @@ var derivativeKeys = derivativeKeyMap{
 		key.WithHelp("r", "reset"),
 	),
 	Section1: key.NewBinding(
-		key.WithKeys("1"),
-		key.WithHelp("1", "function selection"),
+		key.WithKeys("f"),
+		key.WithHelp("f", "function selection"),
 	),
 	Section2: key.NewBinding(
-		key.WithKeys("2"),
-		key.WithHelp("2", "error order"),
+		key.WithKeys("e"),
+		key.WithHelp("e", "error order"),
 	),
 	Section3: key.NewBinding(
-		key.WithKeys("3"),
-		key.WithHelp("3", "derivative order"),
+		key.WithKeys("o"),
+		key.WithHelp("o", "derivative order"),
 	),
 	Section4: key.NewBinding(
-		key.WithKeys("4"),
-		key.WithHelp("4", "philosophy"),
+		key.WithKeys("p"),
+		key.WithHelp("p", "philosophy"),
 	),
 	Section5: key.NewBinding(
-		key.WithKeys("5"),
-		key.WithHelp("5", "inputs"),
+		key.WithKeys("a"),
+		key.WithHelp("a", "arguments"),
 	),
 }
 
@@ -223,48 +229,48 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "tab":
+		switch {
+		case key.Matches(msg, derivativeKeys.CycleNextSection):
 			m.focusedSection = (m.focusedSection + 1) % 5
 			return m, nil
-		case "shift+tab":
+		case key.Matches(msg, derivativeKeys.CyclePrevSection):
 			m.focusedSection = (m.focusedSection - 1 + 5) % 5
 			return m, nil
-		case "up", "k":
+		case key.Matches(msg, derivativeKeys.Up):
 			return m.handleUp(), nil
-		case "down", "j":
+		case key.Matches(msg, derivativeKeys.Down):
 			return m.handleDown(), nil
-		case "left", "h":
+		case key.Matches(msg, derivativeKeys.Left):
 			return m.handleLeft(), nil
-		case "right", "l":
+		case key.Matches(msg, derivativeKeys.Right):
 			return m.handleRight(), nil
-		case "enter":
+		case key.Matches(msg, derivativeKeys.Enter):
 			return m.handleEnter(), nil
-		case "c":
+		case key.Matches(msg, derivativeKeys.Calculate):
 			m.generateResult()
 			return m, nil
-		case "x":
+		case key.Matches(msg, derivativeKeys.Explain):
 			m.showExplanation = !m.showExplanation
 			if m.showExplanation && m.explanation == "" {
 				m.generateExplanation()
 			}
 			return m, nil
-		case "r":
+		case key.Matches(msg, derivativeKeys.Reset):
 			return NewDerivativeModel(m.Theme), nil
-		case "1":
+		case key.Matches(msg, derivativeKeys.Section1):
 			m.focusedSection = 0 // Function Selection
 			return m, nil
-		case "2":
+		case key.Matches(msg, derivativeKeys.Section2):
 			m.focusedSection = 1 // Error Order
 			return m, nil
-		case "3":
+		case key.Matches(msg, derivativeKeys.Section3):
 			m.focusedSection = 2 // Derivative Order
 			return m, nil
-		case "4":
+		case key.Matches(msg, derivativeKeys.Section4):
 			m.focusedSection = 3 // Philosophy
 			return m, nil
-		case "5":
-			m.focusedSection = 4 // Inputs
+		case key.Matches(msg, derivativeKeys.Section5):
+			m.focusedSection = 4 // Arguments
 			return m, nil
 		}
 
@@ -306,7 +312,7 @@ func (m *DerivativeModel) handleUp() *DerivativeModel {
 		if m.philosophy > 0 {
 			m.philosophy--
 		}
-	case 4: // Inputs - focus delta input
+	case 4: // Arguments - focus delta input
 		m.deltaInput.Focus()
 		m.testPointInput.Blur()
 	}
@@ -331,7 +337,7 @@ func (m *DerivativeModel) handleDown() *DerivativeModel {
 		if m.philosophy < 2 {
 			m.philosophy++
 		}
-	case 4: // Inputs - focus test point input
+	case 4: // Arguments - focus test point input
 		m.deltaInput.Blur()
 		m.testPointInput.Focus()
 	}
@@ -340,7 +346,7 @@ func (m *DerivativeModel) handleDown() *DerivativeModel {
 
 func (m *DerivativeModel) handleLeft() *DerivativeModel {
 	switch m.focusedSection {
-	case 4: // Inputs - focus delta input
+	case 4: // Arguments - focus delta input
 		m.deltaInput.Focus()
 		m.testPointInput.Blur()
 	}
@@ -349,7 +355,7 @@ func (m *DerivativeModel) handleLeft() *DerivativeModel {
 
 func (m *DerivativeModel) handleRight() *DerivativeModel {
 	switch m.focusedSection {
-	case 4: // Inputs - focus test point input
+	case 4: // Arguments - focus test point input
 		m.deltaInput.Blur()
 		m.testPointInput.Focus()
 	}
@@ -398,7 +404,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		"Error Order",
 		"Derivative Order",
 		"Philosophy",
-		"Inputs",
+		"Arguments",
 	}
 
 	for i, name := range sectionNames {
@@ -455,7 +461,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 				}
 				sections = append(sections, fmt.Sprintf("%s%s", prefix, phil))
 			}
-		case 4: // Inputs
+		case 4: // Arguments
 			sections = append(sections, fmt.Sprintf("  Delta: %s", m.deltaInput.View()))
 			sections = append(sections, fmt.Sprintf("  Test Point: %s", m.testPointInput.View()))
 		}
@@ -470,7 +476,7 @@ func (m *DerivativeModel) renderSectionContent() string {
 
 	switch m.focusedSection {
 	case 0: // Function Selection
-		content = `# Function Selection (Press 1)
+		content = `# Function Selection
 
 Choose the mathematical function for derivative calculation:
 
@@ -486,7 +492,7 @@ Choose the mathematical function for derivative calculation:
 Use ↑/↓ arrows to select a function type.
 `
 	case 1: // Error Order
-		content = `# Error Order (Press 2)
+		content = `# Error Order
 
 Choose the degree of the polynomial function:
 
@@ -501,7 +507,7 @@ Use ↑/↓ arrows to select the polynomial degree.
 
 **Note**: This setting only applies to polynomial functions.`
 	case 2: // Derivative Order
-		content = `# Derivative Order (Press 3)
+		content = `# Derivative Order
 
 Select the order of derivative to calculate:
 
@@ -518,7 +524,7 @@ Use ↑/↓ arrows to select the derivative order.
 - Second: f''(x) or d²f/dx²
 - Third: f'''(x) or d³f/dx³`
 	case 3: // Philosophy
-		content = `# Philosophy (Press 4)
+		content = `# Philosophy
 
 Choose the finite difference method for numerical differentiation:
 
@@ -539,8 +545,8 @@ Choose the finite difference method for numerical differentiation:
 Use ↑/↓ arrows to select the difference method.
 
 **Recommended**: Central difference for most applications.`
-	case 4: // Inputs
-		content = `# Inputs (Press 5)
+	case 4: // Arguments
+		content = `# Arguments
 
 Configure the numerical calculation parameters:
 
