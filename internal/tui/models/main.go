@@ -113,6 +113,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "i":
 			if m.activeTab != IntegralTab {
 				m.activeTab = IntegralTab
+				m.keys = m.integralModel.GetHelpKeys()
 			}
 			return m, nil
 		}
@@ -160,40 +161,15 @@ func (m MainModel) View() string {
 		)
 	}
 
-	// Tab styles
-	activeTabStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#7D56F4")).
-		Background(lipgloss.Color("#282828")).
-		Padding(0, 2)
-
-	inactiveTabStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666666")).
-		Padding(0, 2)
-
 	// Render tabs
 	var tabsRender []string
 	for i, tab := range m.tabs {
-		var style lipgloss.Style
-		isFirst, isLast, isActive := i == 0, i == len(m.tabs)-1, i == int(m.activeTab)
+		style := m.Theme.Blurred.BlurredButton
+		isActive := i == int(m.activeTab)
 		if isActive {
-			style = activeTabStyle
-		} else {
-			style = inactiveTabStyle
-		}
+			style = m.Theme.Focused.FocusedButton
+		} 
 
-		border, _, _, _, _ := style.GetBorder()
-		if isFirst && isActive {
-			border.BottomLeft = "│"
-		} else if isFirst && !isActive {
-			border.BottomLeft = "├"
-		} else if isLast && isActive {
-			border.BottomRight = "│"
-		} else if isLast && !isActive {
-			border.BottomRight = "┤"
-		}
-
-		style = style.Border(border)
 		tabsRender = append(tabsRender, style.Render(tab))
 	}
 
