@@ -75,8 +75,8 @@ func (m WelcomeModel) View() string {
 			lipgloss.Center, lipgloss.Center,
 			lipgloss.NewStyle().
 				Foreground(m.Theme.Focused.Base.GetBorderBottomForeground()).
-				Width(m.size.Width - 2).
-				Height(m.size.Height -2).
+				Width(m.size.Width-2).
+				Height(m.size.Height-2).
 				Padding(2).
 				AlignHorizontal(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
@@ -90,7 +90,7 @@ func (m WelcomeModel) View() string {
 		)
 	}
 
-	activeStyle := m.Theme.Focused
+	activeStyle := m.Focused
 
 	// Show animated text
 	displayText := m.text[:m.textIndex]
