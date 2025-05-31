@@ -42,6 +42,9 @@ type DerivativeModel struct {
 	testPointInput textinput.Model
 	delta          float64
 	testPoint      float64
+	
+	// Calculate button
+	calculateButtonFocused bool
 
 	// Calculation results
 	result          string
@@ -68,14 +71,8 @@ type derivativeKeyMap struct {
 	Right     key.Binding
 	Enter     key.Binding
 	Space     key.Binding
-	Calculate key.Binding
 	Explain   key.Binding
 	Reset     key.Binding
-	Section1 key.Binding
-	Section2 key.Binding
-	Section3 key.Binding
-	Section4 key.Binding
-	Section5 key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view
@@ -88,8 +85,8 @@ func (k derivativeKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.TabD, k.TabI, k.Help},                           // first column - navigation
 		{k.Up, k.Down, k.Left, k.Right},                    // second column - movement
-		{k.Section1, k.Section2, k.Section3, k.Section4, k.Section5}, // third column - sections
-		{k.Enter, k.Calculate, k.Explain, k.Reset, k.Quit}, // fourth column - actions
+		{k.CycleNextSection, k.CyclePrevSection},           // third column - sections
+		{k.Enter, k.Explain, k.Reset, k.Quit},              // fourth column - actions
 	}
 }
 
@@ -138,10 +135,6 @@ var derivativeKeys = derivativeKeyMap{
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "select/confirm"),
 	),
-	Calculate: key.NewBinding(
-		key.WithKeys("c"),
-		key.WithHelp("c", "calculate"),
-	),
 	Explain: key.NewBinding(
 		key.WithKeys("x"),
 		key.WithHelp("x", "toggle explanation"),
@@ -149,26 +142,6 @@ var derivativeKeys = derivativeKeyMap{
 	Reset: key.NewBinding(
 		key.WithKeys("r"),
 		key.WithHelp("r", "reset"),
-	),
-	Section1: key.NewBinding(
-		key.WithKeys("f"),
-		key.WithHelp("f", "function selection"),
-	),
-	Section2: key.NewBinding(
-		key.WithKeys("e"),
-		key.WithHelp("e", "error order"),
-	),
-	Section3: key.NewBinding(
-		key.WithKeys("o"),
-		key.WithHelp("o", "derivative order"),
-	),
-	Section4: key.NewBinding(
-		key.WithKeys("p"),
-		key.WithHelp("p", "philosophy"),
-	),
-	Section5: key.NewBinding(
-		key.WithKeys("a"),
-		key.WithHelp("a", "arguments"),
 	),
 }
 
@@ -231,10 +204,10 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, derivativeKeys.CycleNextSection):
-			m.focusedSection = (m.focusedSection + 1) % 5
+			m.focusedSection = (m.focusedSection + 1) % 6  // 6 sections now including calculate button
 			return m, nil
 		case key.Matches(msg, derivativeKeys.CyclePrevSection):
-			m.focusedSection = (m.focusedSection - 1 + 5) % 5
+			m.focusedSection = (m.focusedSection - 1 + 6) % 6
 			return m, nil
 		case key.Matches(msg, derivativeKeys.Up):
 			return m.handleUp(), nil
@@ -246,9 +219,6 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.handleRight(), nil
 		case key.Matches(msg, derivativeKeys.Enter):
 			return m.handleEnter(), nil
-		case key.Matches(msg, derivativeKeys.Calculate):
-			m.generateResult()
-			return m, nil
 		case key.Matches(msg, derivativeKeys.Explain):
 			m.showExplanation = !m.showExplanation
 			if m.showExplanation && m.explanation == "" {
@@ -257,21 +227,6 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case key.Matches(msg, derivativeKeys.Reset):
 			return NewDerivativeModel(m.Theme), nil
-		case key.Matches(msg, derivativeKeys.Section1):
-			m.focusedSection = 0 // Function Selection
-			return m, nil
-		case key.Matches(msg, derivativeKeys.Section2):
-			m.focusedSection = 1 // Error Order
-			return m, nil
-		case key.Matches(msg, derivativeKeys.Section3):
-			m.focusedSection = 2 // Derivative Order
-			return m, nil
-		case key.Matches(msg, derivativeKeys.Section4):
-			m.focusedSection = 3 // Philosophy
-			return m, nil
-		case key.Matches(msg, derivativeKeys.Section5):
-			m.focusedSection = 4 // Arguments
-			return m, nil
 		}
 
 		// Handle input for text inputs
@@ -315,6 +270,7 @@ func (m *DerivativeModel) handleUp() *DerivativeModel {
 	case 4: // Arguments - focus delta input
 		m.deltaInput.Focus()
 		m.testPointInput.Blur()
+	case 5: // Calculate button - no up action
 	}
 	return m
 }
@@ -340,6 +296,7 @@ func (m *DerivativeModel) handleDown() *DerivativeModel {
 	case 4: // Arguments - focus test point input
 		m.deltaInput.Blur()
 		m.testPointInput.Focus()
+	case 5: // Calculate button - no down action
 	}
 	return m
 }
@@ -349,6 +306,7 @@ func (m *DerivativeModel) handleLeft() *DerivativeModel {
 	case 4: // Arguments - focus delta input
 		m.deltaInput.Focus()
 		m.testPointInput.Blur()
+	case 5: // Calculate button - no left action
 	}
 	return m
 }
@@ -358,13 +316,16 @@ func (m *DerivativeModel) handleRight() *DerivativeModel {
 	case 4: // Arguments - focus test point input
 		m.deltaInput.Blur()
 		m.testPointInput.Focus()
+	case 5: // Calculate button - no right action
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleEnter() *DerivativeModel {
-	// Generate result when enter is pressed
-	m.generateResult()
+	// Only generate result if calculate button is focused
+	if m.focusedSection == 5 {
+		m.generateResult()
+	}
 	return m
 }
 
@@ -405,6 +366,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		"Derivative Order",
 		"Philosophy",
 		"Arguments",
+		"Calculate",
 	}
 
 	for i, name := range sectionNames {
@@ -464,6 +426,16 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		case 4: // Arguments
 			sections = append(sections, fmt.Sprintf("  Delta: %s", m.deltaInput.View()))
 			sections = append(sections, fmt.Sprintf("  Test Point: %s", m.testPointInput.View()))
+		case 5: // Calculate button
+			// Create a styled button
+			var buttonStyle lipgloss.Style
+			if i == m.focusedSection {
+				buttonStyle = m.Theme.Focused.FocusedButton
+			} else {
+				buttonStyle = m.Theme.Focused.BlurredButton
+			}
+			button := buttonStyle.Render(" CALCULATE ")
+			sections = append(sections, fmt.Sprintf("  %s", button))
 		}
 		sections = append(sections, "") // Add spacing
 	}
@@ -563,8 +535,21 @@ The x-coordinate where the derivative is evaluated.
 - Avoid singularities (e.g., x=0 for 1/x)
 - **Default**: 1.0
 
-Use ←/→ arrows to switch between input fields.
-Press **Enter** or **c** to calculate the derivative.`
+Use ←/→ arrows to switch between input fields.`
+	case 5: // Calculate
+		content = `# Calculate
+
+Execute the derivative calculation with the configured parameters:
+
+## Current Configuration
+
+- **Function**: ` + strings.Split(m.functionOptions[m.selectedFunction], ":")[0] + `
+- **Derivative Order**: ` + m.getDerivativeOrderText() + `
+- **Philosophy**: ` + []string{"Forward", "Backward", "Central"}[m.philosophy] + ` difference
+- **Delta (h)**: ` + fmt.Sprintf("%.6f", m.delta) + `
+- **Test Point**: ` + fmt.Sprintf("%.1f", m.testPoint) + `
+
+Press **Enter** on the Calculate button to run the calculation.`
 	}
 
 	// Render with glamour
