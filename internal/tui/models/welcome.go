@@ -25,14 +25,14 @@ func NewWelcomeModel(theme *Theme) WelcomeModel {
 		textIndex: 0,
 		finished:  false,
 		size: tea.WindowSizeMsg{
-			Width:  MINIMAL_WIDTH,
-			Height: MINIMAL_HEIGHT,
+			Width:  MinimalWidth,
+			Height: MinimalHeight,
 		},
 		Theme: theme,
 	}
 }
 
-func (m WelcomeModel) Init() tea.Cmd {
+func (WelcomeModel) Init() tea.Cmd {
 	return tick()
 }
 
@@ -55,7 +55,7 @@ func (m WelcomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tick()
 		} else if !m.finished {
 			m.finished = true
-			return m, tea.Tick(time.Millisecond*1000, func(t time.Time) tea.Msg {
+			return m, tea.Tick(time.Millisecond*TransitionDelay, func(_ time.Time) tea.Msg {
 				return transitionMsg{}
 			})
 		}
@@ -69,15 +69,15 @@ func (m WelcomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m WelcomeModel) View() string {
-	if m.size.Width < MINIMAL_WIDTH || m.size.Height < MINIMAL_HEIGHT {
+	if m.size.Width < MinimalWidth || m.size.Height < MinimalHeight {
 		return lipgloss.Place(
 			m.size.Width, m.size.Height,
 			lipgloss.Center, lipgloss.Center,
 			lipgloss.NewStyle().
 				Foreground(m.Theme.Focused.Base.GetBorderBottomForeground()).
-				Width(m.size.Width-2).
-				Height(m.size.Height-2).
-				Padding(2).
+				Width(m.size.Width-ComponentPadding).
+				Height(m.size.Height-ComponentPadding).
+				Padding(ComponentPadding).
 				AlignHorizontal(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
 				BorderStyle(lipgloss.RoundedBorder()).
@@ -85,7 +85,7 @@ func (m WelcomeModel) View() string {
 				Border(lipgloss.NormalBorder()).
 				Render(fmt.Sprintf(
 					"Please resize your terminal to at least %dx%d for optimal experience.",
-					MINIMAL_WIDTH, MINIMAL_HEIGHT,
+					MinimalWidth, MinimalHeight,
 				)),
 		)
 	}
@@ -109,7 +109,7 @@ func (m WelcomeModel) View() string {
 	)
 
 	content := lipgloss.NewStyle().
-		Padding(2).
+		Padding(ComponentPadding).
 		BorderStyle(lipgloss.RoundedBorder()).
 		BorderForeground(m.Theme.Focused.Base.GetBorderBottomForeground()).
 		Border(lipgloss.NormalBorder()).Render(flexBox)
@@ -129,7 +129,7 @@ func (m WelcomeModel) skipToMain() tea.Model {
 }
 
 func tick() tea.Cmd {
-	return tea.Tick(time.Millisecond*200, func(t time.Time) tea.Msg {
+	return tea.Tick(time.Millisecond*AnimationDelay, func(t time.Time) tea.Msg {
 		return tickMsg(t)
 	})
 }

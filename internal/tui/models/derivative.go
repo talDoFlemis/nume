@@ -142,7 +142,7 @@ var derivativeKeys = derivativeKeyMap{
 }
 
 // GetHelpKeys implements NumeTabContent.
-func (m *DerivativeModel) GetHelpKeys() help.KeyMap {
+func (*DerivativeModel) GetHelpKeys() help.KeyMap {
 	return derivativeKeys
 }
 
@@ -151,7 +151,7 @@ var _ (NumeTabContent) = (*DerivativeModel)(nil)
 func NewDerivativeModel(theme *Theme) *DerivativeModel {
 	renderer, _ := glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
-		glamour.WithWordWrap(70),
+		glamour.WithWordWrap(GlamourRenderWidth),
 	)
 
 	// Create delta input
@@ -175,64 +175,63 @@ func NewDerivativeModel(theme *Theme) *DerivativeModel {
 			"Hyperbolic: f(x) = cosh(x)",
 		},
 		selectedFunction: 0,
-		polynomialOrder:  3, // default to cubic
+		polynomialOrder:  DefaultPolynomialOrder, // default to cubic
 		derivativeOrder:  1,
-		philosophy:       2, // central
+		philosophy:       DefaultPhilosophy, // central
 		deltaInput:       deltaInput,
 		testPointInput:   testPointInput,
-		delta:            0.001,
-		testPoint:        1.0,
+		delta:            DefaultDelta,
+		testPoint:        DefaultTestPoint,
 		renderer:         renderer,
 		Theme:            theme,
 	}
 }
 
-func (m *DerivativeModel) Init() tea.Cmd {
+func (*DerivativeModel) Init() tea.Cmd {
 	return nil
 }
 
 func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch {
-		case key.Matches(msg, derivativeKeys.CycleNextSection):
-			m.focusedSection = (m.focusedSection + 1) % 6 // 6 sections now including calculate button
+		case key.Matches(keyMsg, derivativeKeys.CycleNextSection):
+			m.focusedSection = (m.focusedSection + 1) % SectionCount // 6 sections now including calculate button
 			return m, nil
-		case key.Matches(msg, derivativeKeys.CyclePrevSection):
-			m.focusedSection = (m.focusedSection - 1 + 6) % 6
+		case key.Matches(keyMsg, derivativeKeys.CyclePrevSection):
+			m.focusedSection = (m.focusedSection - 1 + SectionCount) % SectionCount
 			return m, nil
-		case key.Matches(msg, derivativeKeys.Up):
+		case key.Matches(keyMsg, derivativeKeys.Up):
 			return m.handleUp(), nil
-		case key.Matches(msg, derivativeKeys.Down):
+		case key.Matches(keyMsg, derivativeKeys.Down):
 			return m.handleDown(), nil
-		case key.Matches(msg, derivativeKeys.Left):
+		case key.Matches(keyMsg, derivativeKeys.Left):
 			return m.handleLeft(), nil
-		case key.Matches(msg, derivativeKeys.Right):
+		case key.Matches(keyMsg, derivativeKeys.Right):
 			return m.handleRight(), nil
-		case key.Matches(msg, derivativeKeys.Enter):
+		case key.Matches(keyMsg, derivativeKeys.Enter):
 			return m.handleEnter(), nil
-		case key.Matches(msg, derivativeKeys.Explain):
+		case key.Matches(keyMsg, derivativeKeys.Explain):
 			m.showExplanation = !m.showExplanation
 			if m.showExplanation && m.explanation == "" {
 				m.generateExplanation()
 			}
 			return m, nil
-		case key.Matches(msg, derivativeKeys.Reset):
+		case key.Matches(keyMsg, derivativeKeys.Reset):
 			return NewDerivativeModel(m.Theme), nil
 		}
 
 		// Handle input for text inputs
-		if m.focusedSection == 4 {
+		if m.focusedSection == SectionArguments {
 			var cmd tea.Cmd
-			m.deltaInput, cmd = m.deltaInput.Update(msg)
+			m.deltaInput, cmd = m.deltaInput.Update(keyMsg)
 			if val, err := strconv.ParseFloat(m.deltaInput.Value(), 64); err == nil {
 				m.delta = val
 			}
 			cmds = append(cmds, cmd)
 
-			m.testPointInput, cmd = m.testPointInput.Update(msg)
+			m.testPointInput, cmd = m.testPointInput.Update(keyMsg)
 			if val, err := strconv.ParseFloat(m.testPointInput.Value(), 64); err == nil {
 				m.testPoint = val
 			}
@@ -245,103 +244,103 @@ func (m *DerivativeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *DerivativeModel) handleUp() *DerivativeModel {
 	switch m.focusedSection {
-	case 0: // Function selection
+	case SectionFunctionSelection: // Function selection
 		if m.selectedFunction > 0 {
 			m.selectedFunction--
 		} else {
 			// Cycle to the end
 			m.selectedFunction = len(m.functionOptions) - 1
 		}
-	case 1: // Error order
+	case SectionErrorOrder: // Error order
 		if m.polynomialOrder > 1 {
 			m.polynomialOrder--
 		} else {
 			// Cycle to the highest order (quartic = 4)
-			m.polynomialOrder = 4
+			m.polynomialOrder = MaxPolynomialOrder
 		}
-	case 2: // Derivative order
+	case SectionDerivativeOrder: // Derivative order
 		if m.derivativeOrder > 1 {
 			m.derivativeOrder--
 		} else {
 			// Cycle to the highest order (third = 3)
-			m.derivativeOrder = 3
+			m.derivativeOrder = MaxDerivativeOrder
 		}
-	case 3: // Philosophy
+	case SectionPhilosophy: // Philosophy
 		if m.philosophy > 0 {
 			m.philosophy--
 		} else {
 			// Cycle to the last philosophy (central = 2)
-			m.philosophy = 2
+			m.philosophy = MaxPhilosophyIndex
 		}
-	case 4: // Arguments - focus delta input
+	case SectionArguments: // Arguments - focus delta input
 		m.deltaInput.Focus()
 		m.testPointInput.Blur()
-	case 5: // Calculate button - no up action
+	case SectionCalculate: // Calculate button - no up action
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleDown() *DerivativeModel {
 	switch m.focusedSection {
-	case 0: // Function selection
+	case SectionFunctionSelection: // Function selection
 		if m.selectedFunction < len(m.functionOptions)-1 {
 			m.selectedFunction++
 		} else {
 			// Cycle to the beginning
 			m.selectedFunction = 0
 		}
-	case 1: // Error order
-		if m.polynomialOrder < 4 {
+	case SectionErrorOrder: // Error order
+		if m.polynomialOrder < MaxPolynomialOrder {
 			m.polynomialOrder++
 		} else {
 			// Cycle to the lowest order (linear = 1)
 			m.polynomialOrder = 1
 		}
-	case 2: // Derivative order
-		if m.derivativeOrder < 3 {
+	case SectionDerivativeOrder: // Derivative order
+		if m.derivativeOrder < MaxDerivativeOrder {
 			m.derivativeOrder++
 		} else {
 			// Cycle to the lowest order (first = 1)
 			m.derivativeOrder = 1
 		}
-	case 3: // Philosophy
-		if m.philosophy < 2 {
+	case SectionPhilosophy: // Philosophy
+		if m.philosophy < MaxPhilosophyIndex {
 			m.philosophy++
 		} else {
 			// Cycle to the first philosophy (forward = 0)
 			m.philosophy = 0
 		}
-	case 4: // Arguments - focus test point input
+	case SectionArguments: // Arguments - focus test point input
 		m.deltaInput.Blur()
 		m.testPointInput.Focus()
-	case 5: // Calculate button - no down action
+	case SectionCalculate: // Calculate button - no down action
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleLeft() *DerivativeModel {
 	switch m.focusedSection {
-	case 4: // Arguments - focus delta input
+	case SectionArguments: // Arguments - focus delta input
 		m.deltaInput.Focus()
 		m.testPointInput.Blur()
-	case 5: // Calculate button - no left action
+	case SectionCalculate: // Calculate button - no left action
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleRight() *DerivativeModel {
 	switch m.focusedSection {
-	case 4: // Arguments - focus test point input
+	case SectionArguments: // Arguments - focus test point input
 		m.deltaInput.Blur()
 		m.testPointInput.Focus()
-	case 5: // Calculate button - no right action
+	case SectionCalculate: // Calculate button - no right action
 	}
 	return m
 }
 
 func (m *DerivativeModel) handleEnter() *DerivativeModel {
 	// Only generate result if calculate button is focused
-	if m.focusedSection == 5 {
+	if m.focusedSection == SectionCalculate {
 		m.generateResult()
 	}
 	return m
@@ -399,7 +398,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 
 		// Add content based on section
 		switch i {
-		case 0: // Function Selection
+		case SectionFunctionSelection: // Function Selection
 			for j, function := range m.functionOptions {
 				style := m.Blurred.UnselectedPrefix
 				if j == m.selectedFunction {
@@ -408,7 +407,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 				functionName := strings.Split(function, ":")[0]
 				sections = append(sections, style.Render(functionName))
 			}
-		case 1: // Error Order
+		case SectionErrorOrder: // Error Order
 			orderNames := []string{"Linear", "Quadratic", "Cubic", "Quartic"}
 			for j, orderName := range orderNames {
 				style := m.Blurred.UnselectedPrefix
@@ -420,7 +419,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 					style.Render(fmt.Sprintf("%s (degree %d)", orderName, j+1)),
 				)
 			}
-		case 2: // Derivative Order
+		case SectionDerivativeOrder: // Derivative Order
 			orderOptions := []string{"First", "Second", "Third"}
 			for j, order := range orderOptions {
 				style := m.Blurred.UnselectedPrefix
@@ -429,7 +428,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 				}
 				sections = append(sections, style.Render(order))
 			}
-		case 3: // Philosophy
+		case SectionPhilosophy: // Philosophy
 			philosophyOptions := []string{"Forward", "Backward", "Central"}
 			for j, phil := range philosophyOptions {
 				style := m.Blurred.UnselectedPrefix
@@ -438,10 +437,10 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 				}
 				sections = append(sections, style.Render(phil))
 			}
-		case 4: // Arguments
+		case SectionArguments: // Arguments
 			sections = append(sections, fmt.Sprintf("  Delta: %s", m.deltaInput.View()))
 			sections = append(sections, fmt.Sprintf("  Test Point: %s", m.testPointInput.View()))
-		case 5: // Calculate button
+		case SectionCalculate: // Calculate button
 			// Create a styled button
 			var buttonStyle lipgloss.Style
 			if i == m.focusedSection {
@@ -462,7 +461,7 @@ func (m *DerivativeModel) renderSectionContent() string {
 	var content string
 
 	switch m.focusedSection {
-	case 0: // Function Selection
+	case SectionFunctionSelection: // Function Selection
 		content = `# Function Selection
 
 Choose the mathematical function for derivative calculation:
@@ -476,7 +475,7 @@ Choose the mathematical function for derivative calculation:
 
 Use ↑/↓ arrows to select a function type.
 `
-	case 1: // Error Order
+	case SectionErrorOrder: // Error Order
 		content = `# Error Order
 
 Choose the degree of the error for the approximation:
@@ -489,7 +488,7 @@ Choose the degree of the error for the approximation:
 - **Quartic (degree 4)**: O(h⁴)
 
 Use ↑/↓ arrows to select the approximation degree.`
-	case 2: // Derivative Order
+	case SectionDerivativeOrder: // Derivative Order
 		content = `# Derivative Order
 
 Select the order of derivative to calculate:
@@ -506,7 +505,7 @@ Use ↑/↓ arrows to select the derivative order.
 - First: f'(x) or df/dx
 - Second: f''(x) or d²f/dx²
 - Third: f'''(x) or d³f/dx³`
-	case 3: // Philosophy
+	case SectionPhilosophy: // Philosophy
 		content = `# Philosophy
 
 Choose the finite difference method for numerical differentiation:
@@ -528,7 +527,7 @@ Choose the finite difference method for numerical differentiation:
 Use ↑/↓ arrows to select the difference method.
 
 **Recommended**: Central difference for most applications.`
-	case 4: // Arguments
+	case SectionArguments: // Arguments
 		content = `# Arguments
 
 Configure the numerical calculation parameters:
@@ -547,7 +546,7 @@ The x-coordinate where the derivative is evaluated.
 - **Default**: 1.0
 
 Use ←/→ arrows to switch between input fields.`
-	case 5: // Calculate
+	case SectionCalculate: // Calculate
 		content = `# Calculate
 
 Execute the derivative calculation with the configured parameters:
@@ -585,11 +584,11 @@ func (m *DerivativeModel) generateResult() {
 	// Choose strategy based on philosophy
 	var strategy usecases.DifferenceStrategy
 	switch m.philosophy {
-	case 0: // forward
+	case PhilosophyForward: // forward
 		strategy = &usecases.ForwardDifferenceStrategy{}
-	case 1: // backward
+	case PhilosophyBackward: // backward
 		strategy = &usecases.BackwardDifferenceStrategy{}
-	case 2: // central
+	case PhilosophyCentral: // central
 		strategy = &usecases.CentralDifferenceStrategy{}
 	default:
 		strategy = &usecases.CentralDifferenceStrategy{}
@@ -602,11 +601,11 @@ func (m *DerivativeModel) generateResult() {
 	var err error
 
 	switch m.derivativeOrder {
-	case 1:
+	case DerivativeOrderFirst:
 		derivativeExpr, err = strategy.Derivative(ctx, m.functionExpr, m.delta)
-	case 2:
+	case DerivativeOrderSecond:
 		derivativeExpr, err = strategy.DoubleDerivative(ctx, m.functionExpr, m.delta)
-	case 3:
+	case DerivativeOrderThird:
 		// For third derivative, apply derivative twice
 		firstDeriv, err1 := strategy.Derivative(ctx, m.functionExpr, m.delta)
 		if err1 != nil {
@@ -636,11 +635,11 @@ func (m *DerivativeModel) generateResult() {
 
 func (m *DerivativeModel) getDerivativeOrderText() string {
 	switch m.derivativeOrder {
-	case 1:
+	case DerivativeOrderFirst:
 		return "First derivative (f'(x))"
-	case 2:
+	case DerivativeOrderSecond:
 		return "Second derivative (f''(x))"
-	case 3:
+	case DerivativeOrderThird:
 		return "Third derivative (f'''(x))"
 	default:
 		return "Unknown"
@@ -654,19 +653,19 @@ func (m *DerivativeModel) setupFunctionExpression() {
 
 	// Define function expressions based on selected function
 	switch m.selectedFunction {
-	case 0: // Polynomial
+	case SectionFunctionSelection: // Polynomial
 		m.functionExpr = func(x float64) float64 {
-			return math.Pow(x, 4) - 2*x*x + 5*x - 1
+			return math.Pow(x, PolynomialPower) - 2*x*x + 5*x - 1
 		}
-	case 1: // Exponential
+	case SectionErrorOrder: // Exponential
 		m.functionExpr = func(x float64) float64 {
-			return math.Exp(3 * x)
+			return math.Exp(ExponentialMultiple * x)
 		}
-	case 2: // Trigonometric
+	case SectionDerivativeOrder: // Trigonometric
 		m.functionExpr = func(x float64) float64 {
-			return math.Sin(2 * x)
+			return math.Sin(TrigMultiple * x)
 		}
-	case 3: // Hyperbolic
+	case SectionPhilosophy: // Hyperbolic
 		m.functionExpr = math.Cosh
 	}
 }
@@ -674,7 +673,9 @@ func (m *DerivativeModel) setupFunctionExpression() {
 func (m *DerivativeModel) generateExplanation() {
 	philosophyName := []string{"forward", "backward", "central"}[m.philosophy]
 	filename := fmt.Sprintf("%s_difference.md", philosophyName)
-	explanationPath := filepath.Join("internal", "tui", "views", "explanations", filename)
+	explanationPath := filepath.Clean(
+		filepath.Join("internal", "tui", "views", "explanations", filename),
+	)
 
 	if content, err := os.ReadFile(explanationPath); err == nil {
 		m.explanation = string(content)

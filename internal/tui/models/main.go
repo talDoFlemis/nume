@@ -124,15 +124,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m MainModel) View() string {
-	if m.size.Width < MINIMAL_WIDTH || m.size.Height < MINIMAL_HEIGHT {
+	if m.size.Width < MinimalWidth || m.size.Height < MinimalHeight {
 		return lipgloss.Place(
 			m.size.Width, m.size.Height,
 			lipgloss.Center, lipgloss.Center,
 			lipgloss.NewStyle().
 				Foreground(m.Focused.Base.GetBorderBottomForeground()).
-				Width(m.size.Width-2).
-				Height(m.size.Height-2).
-				Padding(2).
+				Width(m.size.Width-ComponentPadding).
+				Height(m.size.Height-ComponentPadding).
+				Padding(ComponentPadding).
 				AlignHorizontal(lipgloss.Center).
 				AlignVertical(lipgloss.Center).
 				BorderStyle(lipgloss.RoundedBorder()).
@@ -140,7 +140,7 @@ func (m MainModel) View() string {
 				Border(lipgloss.NormalBorder()).
 				Render(fmt.Sprintf(
 					"Please resize your terminal to at least %dx%d for optimal experience.",
-					MINIMAL_WIDTH, MINIMAL_HEIGHT,
+					MinimalWidth, MinimalHeight,
 				)),
 		)
 	}

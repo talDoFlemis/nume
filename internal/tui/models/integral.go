@@ -31,7 +31,7 @@ var integralKeys = derivativeKeyMap{
 }
 
 // GetHelpKeys implements NumeTabContent.
-func (m *IntegralModel) GetHelpKeys() help.KeyMap {
+func (*IntegralModel) GetHelpKeys() help.KeyMap {
 	return integralKeys
 }
 
@@ -41,18 +41,18 @@ func NewIntegralModel() *IntegralModel {
 	return &IntegralModel{}
 }
 
-func (m *IntegralModel) Init() tea.Cmd {
+func (*IntegralModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m *IntegralModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return m, nil
+func (*IntegralModel) Update(tea.Msg) (tea.Model, tea.Cmd) {
+	return &IntegralModel{}, nil
 }
 
-func (m *IntegralModel) View() string {
+func (_ *IntegralModel) View() string {
 	style := lipgloss.NewStyle().
-		Padding(2).
-		Width(70)
+		Padding(ComponentPadding).
+		Width(GlamourRenderWidth)
 
 	content := `
 🚧 Integral Calculations

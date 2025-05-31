@@ -96,7 +96,10 @@ func ThemeBase() *Theme {
 		MarginRight(1)
 
 	// Focused styles.
-	t.Focused.Base = lipgloss.NewStyle().PaddingLeft(1).BorderStyle(lipgloss.ThickBorder()).BorderLeft(true)
+	t.Focused.Base = lipgloss.NewStyle().
+		PaddingLeft(1).
+		BorderStyle(lipgloss.ThickBorder()).
+		BorderLeft(true)
 	t.Focused.Card = t.Focused.Base
 	t.Focused.ErrorIndicator = lipgloss.NewStyle().SetString(" *")
 	t.Focused.ErrorMessage = lipgloss.NewStyle().SetString(" *")

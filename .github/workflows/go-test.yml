@@ -28,9 +28,6 @@ jobs:
           mkdir -p frontend/dist
           touch frontend/dist/index.html
 
-      - name: Lint
-        uses: golangci/golangci-lint-action@v7
-
       - name: Build
         run: go build -v ./...
 

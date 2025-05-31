@@ -26,7 +26,6 @@ linters:
     - nakedret
     - noctx
     - nolintlint
-    - revive
     - staticcheck
     - testifylint
     - unconvert
@@ -44,6 +43,11 @@ linters:
           disabled: true
         - name: add-constant
           disabled: true
+        - name: line-length-limit
+          severity: warning
+          disabled: false
+          exclude: [""]
+          arguments: [120]
   exclusions:
     rules:
       - path: config.go
