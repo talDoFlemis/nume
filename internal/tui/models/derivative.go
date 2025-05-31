@@ -383,39 +383,39 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		switch i {
 		case 0: // Function Selection
 			for j, function := range m.functionOptions {
-				prefix := "  "
+				style := m.Theme.Blurred.UnselectedPrefix
 				if j == m.selectedFunction {
-					prefix = "▶ "
+					style = m.Theme.Focused.SelectedPrefix
 				}
 				functionName := strings.Split(function, ":")[0]
-				sections = append(sections, fmt.Sprintf("%s%s", prefix, functionName))
+				sections = append(sections, style.Render(functionName))
 			}
 		case 1: // Error Order
 			orderNames := []string{"Linear", "Quadratic", "Cubic", "Quartic"}
 			for j, orderName := range orderNames {
-				prefix := "  "
+				style := m.Theme.Blurred.UnselectedPrefix
 				if j+1 == m.polynomialOrder {
-					prefix = "▶ "
+					style = m.Theme.Focused.SelectedPrefix
 				}
-				sections = append(sections, fmt.Sprintf("%s%s (degree %d)", prefix, orderName, j+1))
+				sections = append(sections, style.Render(fmt.Sprintf("%s (degree %d)", orderName, j+1)))
 			}
 		case 2: // Derivative Order
 			orderOptions := []string{"First", "Second", "Third"}
 			for j, order := range orderOptions {
-				prefix := "  "
+				style := m.Theme.Blurred.UnselectedPrefix
 				if j+1 == m.derivativeOrder {
-					prefix = "▶ "
+					style = m.Theme.Focused.SelectedPrefix
 				}
-				sections = append(sections, fmt.Sprintf("%s%s", prefix, order))
+				sections = append(sections, style.Render(order))
 			}
 		case 3: // Philosophy
 			philosophyOptions := []string{"Forward", "Backward", "Central"}
 			for j, phil := range philosophyOptions {
-				prefix := "  "
+				style := m.Theme.Blurred.UnselectedPrefix
 				if j == m.philosophy {
-					prefix = "▶ "
+					style = m.Theme.Focused.SelectedPrefix
 				}
-				sections = append(sections, fmt.Sprintf("%s%s", prefix, phil))
+				sections = append(sections, style.Render(phil))
 			}
 		case 4: // Arguments
 			sections = append(sections, fmt.Sprintf("  Delta: %s", m.deltaInput.View()))
