@@ -150,8 +150,8 @@ var _ (NumeTabContent) = (*DerivativeModel)(nil)
 
 func NewDerivativeModel(theme *Theme) *DerivativeModel {
 	renderer, _ := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
 		glamour.WithWordWrap(GlamourRenderWidth),
+		glamour.WithStandardStyle("dracula"),
 	)
 
 	// Create delta input
@@ -360,8 +360,8 @@ func (m *DerivativeModel) View() string {
 	// Join horizontally
 	content := lipgloss.JoinHorizontal(
 		lipgloss.Top,
-		lipgloss.NewStyle().Width(leftWidth).Render(leftContent),
-		lipgloss.NewStyle().Width(rightWidth).Render(rightContent),
+		m.Renderer.NewStyle().Width(leftWidth).Render(leftContent),
+		m.Renderer.NewStyle().Width(rightWidth).Render(rightContent),
 	)
 
 	return content
@@ -384,11 +384,11 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 		var style lipgloss.Style
 		if i == m.focusedSection {
 			// Use focused title color from theme
-			style = lipgloss.NewStyle().
+			style = m.Renderer.NewStyle().
 				Foreground(m.Focused.Title.GetForeground()).
 				Bold(true)
 		} else {
-			style = lipgloss.NewStyle().
+			style = m.Renderer.NewStyle().
 				Foreground(lipgloss.Color("#666666"))
 		}
 
