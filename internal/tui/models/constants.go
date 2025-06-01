@@ -25,7 +25,7 @@ const (
 
 	// Animation timing
 	AnimationDelay  = 200  // milliseconds
-	TransitionDelay = 1000 // milliseconds
+	TransitionDelay = 3000 // milliseconds
 
 	// Component padding
 	ComponentPadding = 2
