@@ -27,9 +27,9 @@ func NewWelcomeModel(theme *Theme, term, profile, user string) WelcomeModel {
 		text:      "nume",
 		textIndex: 0,
 		finished:  false,
-		term: term,
-		profile: profile,
-		user: user,
+		term:      term,
+		profile:   profile,
+		user:      user,
 		size: tea.WindowSizeMsg{
 			Width:  MinimalWidth,
 			Height: MinimalHeight,
@@ -92,8 +92,6 @@ func (m WelcomeModel) View() string {
 		)
 	}
 
-	activeStyle := m.Focused
-
 	// Show animated text
 	displayText := m.text[:m.textIndex]
 
@@ -104,8 +102,18 @@ func (m WelcomeModel) View() string {
 
 	flexBox := lipgloss.JoinVertical(
 		lipgloss.Center,
-		fmt.Sprintf("Welcome %s to", m.user),
-		activeStyle.NoteTitle.Render(strings.ToUpper(displayText)),
+		fmt.Sprintf(
+			"Welcome %s to",
+			m.Renderer.NewStyle().
+				Bold(true).
+				Foreground(m.Focused.Title.GetForeground()).
+				Render(m.user),
+		),
+		"\n",
+		m.Renderer.NewStyle().
+			Bold(true).
+			Foreground(m.Focused.Title.GetForeground()).
+			Render(strings.ToUpper(displayText)),
 		"\n",
 		fmt.Sprintf("Terminal Size: %d columns x %d rows", m.size.Width, m.size.Height),
 		fmt.Sprintf("Terminal: %s", m.term),
