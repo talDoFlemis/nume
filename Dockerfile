@@ -31,7 +31,7 @@ COPY --from=user --chown=scratchuser:scratchuser /home/scratchuser/.ssh /app/.ss
 
 USER scratchuser
 STOPSIGNAL SIGINT
-EXPOSE 8080
+EXPOSE 8888
 
 ENV NUME_APP_ENVIRONMENT="prod"
 
