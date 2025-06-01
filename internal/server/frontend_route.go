@@ -2,14 +2,12 @@ package server
 
 import (
 	"log/slog"
-	"net/http"
 	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/taldoflemis/nume/configs"
-	"github.com/taldoflemis/nume/frontend"
 )
 
 func NewFrontendRoute(cfg configs.Config, e *echo.Echo) error {
@@ -25,9 +23,6 @@ func NewFrontendRoute(cfg configs.Config, e *echo.Echo) error {
 func setupViteProd(cfg configs.HTTPCfg, e *echo.Echo) {
 	// Setup MPA serving
 	// Use the static assets from the dist directory
-	e.FileFS("/", "index.html", frontend.DistIndexHTML)
-	e.StaticFS("/", frontend.DistDirFS)
-
 	// This is needed to serve the index.html file for all routes that
 	// are not /api/* needed for SPA to work when loading a specific
 	// url directly
@@ -44,7 +39,6 @@ func setupViteProd(cfg configs.HTTPCfg, e *echo.Echo) {
 		HTML5:      true,
 		Browse:     false,
 		IgnoreBase: true,
-		Filesystem: http.FS(frontend.DistDirFS),
 	}))
 }
 

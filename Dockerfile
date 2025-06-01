@@ -1,16 +1,3 @@
-FROM node:lts AS frontend_base
-
-FROM frontend_base AS frontend_builder
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-WORKDIR /app
-COPY frontend/ /app
-
-RUN --mount=type=cache,id=s/78f32e04-4dcf-4cb1-9282-97744b29639c-/pnpm/store,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run build
-
 FROM golang:1.24-alpine AS builder
 WORKDIR /app
 
@@ -25,14 +12,13 @@ RUN --mount=type=cache,id=s/78f32e04-4dcf-4cb1-9282-97744b29639c-/go/pkg/mod/,ta
 	go mod download -x
 
 COPY . .
-COPY --from=frontend_builder /app/dist /app/frontend/dist
 
 RUN --mount=type=cache,id=s/78f32e04-4dcf-4cb1-9282-97744b29639c-/go/pkg/mod/,target=/go/pkg/mod/ \
 	--mount=type=cache,id=s/78f32e04-4dcf-4cb1-9282-97744b29639c-/root/.cache/go-build,target=/root/.cache/go-build \
-	CGO_ENABLED=0 GOOS=linux go build -o server  -ldflags '-s -w -extldflags "-static"' ./cmd/web
+	CGO_ENABLED=0 GOOS=linux go build -o server  -ldflags '-s -w -extldflags "-static"' ./cmd/ssh
 
 FROM ubuntu:oracular AS user
-RUN useradd -u 10001 scratchuser
+RUN useradd -u 10001 scratchuser && mkdir -p /home/scratchuser/.ssh && chown scratchuser:scratchuser /home/scratchuser/.ssh
 
 FROM scratch
 WORKDIR /app
@@ -41,6 +27,7 @@ WORKDIR /app
 COPY --from=builder /app/server ./
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=user /etc/passwd /etc/passwd
+COPY --from=user --chown=scratchuser:scratchuser /home/scratchuser/.ssh /app/.ssh
 
 USER scratchuser
 STOPSIGNAL SIGINT

@@ -3,6 +3,11 @@ app:
   version: 0.1.0
   environment: local
 
+ssh:
+  port: 8080
+  host: "0.0.0.0"
+  host-key-path: ".ssh/id_ed25519"
+
 http:
   port: 8888
   api-prefix: "/api"

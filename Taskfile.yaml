@@ -7,10 +7,22 @@ tasks:
       - task: test
 
   build:
-    desc: "Build the application"
+    desc: "Build the web application"
     cmds:
-      - echo "Building..."
+      - echo "Building web application..."
       - go build -o main ./cmd/web/main.go
+
+  build-tui:
+    desc: "Build the TUI application"
+    cmds:
+      - echo "Building TUI application..."
+      - go build -o nume-tui ./cmd/tui
+
+  tui:
+    desc: "Build and run the TUI application"
+    deps: [build-tui]
+    cmds:
+      - ./nume-tui
 
   run:
     desc: "Run the application with frontend"
@@ -58,10 +70,10 @@ tasks:
       - go test ./internal/database -v
 
   clean:
-    desc: "Clean the built binary"
+    desc: "Clean the built binaries"
     cmds:
       - echo "Cleaning..."
-      - rm -f main
+      - rm -f main nume-tui
 
   watch:
     desc: "Live reload using air"
