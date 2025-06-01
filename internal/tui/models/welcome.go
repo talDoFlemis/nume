@@ -14,16 +14,22 @@ type WelcomeModel struct {
 	textIndex int
 	finished  bool
 	size      tea.WindowSizeMsg
+	term      string
+	profile   string
+	user      string
 	*Theme
 }
 
 type tickMsg time.Time
 
-func NewWelcomeModel(theme *Theme) WelcomeModel {
+func NewWelcomeModel(theme *Theme, term, profile, user string) WelcomeModel {
 	return WelcomeModel{
 		text:      "nume",
 		textIndex: 0,
 		finished:  false,
+		term: term,
+		profile: profile,
+		user: user,
 		size: tea.WindowSizeMsg{
 			Width:  MinimalWidth,
 			Height: MinimalHeight,
@@ -70,10 +76,10 @@ func (m WelcomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m WelcomeModel) View() string {
 	if m.size.Width < MinimalWidth || m.size.Height < MinimalHeight {
-		return lipgloss.Place(
+		return m.Renderer.Place(
 			m.size.Width, m.size.Height,
 			lipgloss.Center, lipgloss.Center,
-			lipgloss.NewStyle().
+			m.Renderer.NewStyle().
 				Foreground(m.Theme.Focused.Base.GetBorderBottomForeground()).
 				Width(m.size.Width-ComponentPadding).
 				Height(m.size.Height-ComponentPadding).
@@ -102,13 +108,16 @@ func (m WelcomeModel) View() string {
 
 	flexBox := lipgloss.JoinVertical(
 		lipgloss.Center,
-		"Welcome to",
+		fmt.Sprintf("Welcome %s to", m.user),
 		activeStyle.NoteTitle.Render(strings.ToUpper(displayText)),
 		"Press any key to continue...",
-		fmt.Sprintf("Terminal Size: %d columns x %d rows\n", m.size.Width, m.size.Height),
+		"\n",
+		fmt.Sprintf("Terminal Size: %d columns x %d rows", m.size.Width, m.size.Height),
+		fmt.Sprintf("Terminal: %s", m.term),
+		fmt.Sprintf("Terminal Color Profile: %s", m.profile),
 	)
 
-	content := lipgloss.NewStyle().
+	content := m.Renderer.NewStyle().
 		Padding(ComponentPadding).
 		BorderStyle(lipgloss.RoundedBorder()).
 		BorderForeground(m.Theme.Focused.Base.GetBorderBottomForeground()).
