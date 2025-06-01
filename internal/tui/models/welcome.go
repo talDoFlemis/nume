@@ -48,10 +48,6 @@ func (m WelcomeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		// Allow skipping animation with any key
-		if !m.finished {
-			return m.skipToMain(), nil
-		}
 	case tea.WindowSizeMsg:
 		m.size = msg
 
@@ -110,7 +106,6 @@ func (m WelcomeModel) View() string {
 		lipgloss.Center,
 		fmt.Sprintf("Welcome %s to", m.user),
 		activeStyle.NoteTitle.Render(strings.ToUpper(displayText)),
-		"Press any key to continue...",
 		"\n",
 		fmt.Sprintf("Terminal Size: %d columns x %d rows", m.size.Width, m.size.Height),
 		fmt.Sprintf("Terminal: %s", m.term),
