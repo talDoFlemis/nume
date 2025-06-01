@@ -128,7 +128,7 @@ func (m MainModel) View() string {
 		return lipgloss.Place(
 			m.size.Width, m.size.Height,
 			lipgloss.Center, lipgloss.Center,
-			lipgloss.NewStyle().
+			m.Renderer.NewStyle().
 				Foreground(m.Focused.Base.GetBorderBottomForeground()).
 				Width(m.size.Width-ComponentPadding).
 				Height(m.size.Height-ComponentPadding).
@@ -160,7 +160,7 @@ func (m MainModel) View() string {
 	tabsRow := lipgloss.JoinHorizontal(lipgloss.Top, tabsRender...)
 
 	// Header with instructions
-	header := lipgloss.NewStyle().
+	header := m.Renderer.NewStyle().
 		Bold(true).
 		Foreground(m.Focused.Title.GetForeground()).
 		Render("NUME - Numerical Methods Calculator")
@@ -169,7 +169,7 @@ func (m MainModel) View() string {
 	helpView := m.help.View(m.keys)
 
 	// Style the help view
-	styledHelp := lipgloss.NewStyle().
+	styledHelp := m.Renderer.NewStyle().
 		Border(lipgloss.NormalBorder(), true, false, false, false).
 		BorderForeground(m.Focused.Base.GetBorderBottomForeground()).
 		Render(helpView)
@@ -189,7 +189,7 @@ func (m MainModel) View() string {
 		"",
 		tabsRow,
 		"",
-		lipgloss.NewStyle().
+		m.Renderer.NewStyle().
 			BorderTop(false).
 			Padding(1).
 			Render(content),
