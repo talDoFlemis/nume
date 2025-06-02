@@ -16,7 +16,7 @@ type Theme struct {
 	Blurred        FieldStyles
 	Focused        FieldStyles
 	Help           help.Styles
-	Renderer *lipgloss.Renderer
+	Renderer       *lipgloss.Renderer
 }
 
 // FormStyles are the styles for a form.

@@ -438,7 +438,7 @@ func (m *DerivativeModel) renderSectionNavigation() string {
 				sections = append(sections, style.Render(phil))
 			}
 		case SectionArguments: // Arguments
-		// TODO: handle this with renderer from theme and use a custom prompt from the lib
+			// TODO: handle this with renderer from theme and use a custom prompt from the lib
 			sections = append(sections, fmt.Sprintf("  Delta: %s", m.deltaInput.View()))
 			sections = append(sections, fmt.Sprintf("  Test Point: %s", m.testPointInput.View()))
 		case SectionCalculate: // Calculate button

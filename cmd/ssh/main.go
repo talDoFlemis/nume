@@ -50,7 +50,7 @@ func gracefulShutdown(
 	if err := s.Shutdown(ctx); err != nil {
 		slog.Error("failed to shutdown server gracefully", slog.Any("error", err))
 		return
-	} 
+	}
 
 	// Notify the main goroutine that the shutdown is complete
 	done <- true
