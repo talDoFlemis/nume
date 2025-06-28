@@ -177,6 +177,58 @@ func (u *PowerUseCase) FarthestPower(
 	return farthestEigenvalue, nil
 }
 
+func (u *PowerUseCase) NearestEigenvaluePower(
+	ctx context.Context,
+	matrix [][]float64,
+	initialGuess []float64,
+	scalarToGoNearest float64,
+	epsilon float64,
+	maxNumberOfIterations uint64,
+) (float64, error) {
+	slog.DebugContext(ctx, "Starting the NearestEigenvaluePower method",
+		slog.Any("matrix", matrix),
+		slog.Any("initialGuess", initialGuess),
+		slog.Float64("epsilon", epsilon),
+		slog.Uint64("maxNumberOfIterations", maxNumberOfIterations),
+		slog.Float64("scalarToGoNearest", scalarToGoNearest),
+	)
+
+	slog.DebugContext(ctx, "Creating matrix and scalar nearest matrix")
+
+	A := constructMatrix(matrix)
+	scalarNearestMatrix := mat.NewDense(len(matrix[0]), len(matrix[0]), nil)
+	for i := 0; i < len(matrix[0]); i++ {
+		scalarNearestMatrix.Set(i, i, -1.0*scalarToGoNearest)
+	}
+
+	slog.DebugContext(ctx, "Scalar nearest matrix created",
+		slog.Any("scalarNearestMatrix", scalarNearestMatrix.RawMatrix().Data),
+	)
+
+	var matrixToFindSmallestPowerResult mat.Dense
+	matrixToFindSmallestPowerResult.Add(A, scalarNearestMatrix)
+
+	slog.DebugContext(ctx, "Matrix to find smallest power result",
+		slog.Any("matrixToFindSmallestPowerResult", matrixToFindSmallestPowerResult.RawMatrix().Data),
+	)
+
+	matrixAsSlice := denseToSliceOfSlices(&matrixToFindSmallestPowerResult)
+
+	result, err := u.InversePower(ctx, matrixAsSlice, initialGuess, epsilon, maxNumberOfIterations)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to compute the nearest eigenvalue power method", slog.Any("error", err))
+		return 0.0, fmt.Errorf("failed to compute the nearest eigenvalue power method: %w", err)
+	}
+
+	nearestEigenvalue := result.Eigenvalue + scalarToGoNearest
+
+	slog.InfoContext(ctx, "Finished the NearestEigenvaluePower method",
+		slog.Float64("nearestEigenvalue", nearestEigenvalue),
+	)
+
+	return nearestEigenvalue, nil
+}
+
 func (u *PowerUseCase) innerRegularPower(ctx context.Context,
 	matrix *mat.Dense,
 	initialGuess *mat.VecDense,
@@ -266,6 +318,22 @@ func (u *PowerUseCase) innerRegularPower(ctx context.Context,
 		Eigenvector:   bestEigenvector.RawVector().Data,
 		NumIterations: currentIteration,
 	}, nil
+}
+
+func denseToSliceOfSlices(m *mat.Dense) [][]float64 {
+	r, c := m.Dims()
+
+	result := make([][]float64, r)
+	for i := range result {
+		result[i] = make([]float64, c)
+	}
+
+	for i := range r {
+		for j := range c {
+			result[i][j] = m.At(i, j)
+		}
+	}
+	return result
 }
 
 func constructMatrix(matrix [][]float64) *mat.Dense {

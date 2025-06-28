@@ -202,6 +202,46 @@ func TestFarthestPowerMethod(t *testing.T) {
 	}
 }
 
+func TestNearestEigenvaluePowerMethod(t *testing.T) {
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+	handler := slog.NewJSONHandler(os.Stdout, opts)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+
+	// Arrange
+	t.Parallel()
+
+	tests := []shiftedPowerTestCase{
+		{
+			matrix: [][]float64{
+				{10, 6, 7},
+				{1, 7, -2},
+				{2, 2, 2},
+			},
+			initialGuess:       []float64{1, 1, 1},
+			epsilon:            1e-10,
+			expectedEigenvalue: 6,
+			k:                  5,
+		},
+	}
+
+	for _, tc := range tests {
+		testCaseName := fmt.Sprintf("%v", tc.matrix)
+		t.Run(testCaseName, func(t *testing.T) {
+			useCase := NewPowerUseCase()
+
+			// Act
+			foundEigenvalue, err := useCase.NearestEigenvaluePower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
+
+			// Assert
+			assert.NoError(t, err, "Expected no error for test case: %s", testCaseName)
+			assert.InDelta(t, tc.expectedEigenvalue, foundEigenvalue, tc.epsilon*10)
+		})
+	}
+}
+
 func matchVectorsWithTolerance(t *testing.T, expected, actual []float64, tolerance float64) {
 	actualVec := constructVector(actual)
 	normalizedActualVec := mat.NewVecDense(actualVec.Len(), nil)
