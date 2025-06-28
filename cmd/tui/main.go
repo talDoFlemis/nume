@@ -14,6 +14,7 @@ import (
 func main() {
 	// Start with the welcome screen
 	renderer := lipgloss.DefaultRenderer()
+
 	theme := models.ThemeCatppuccin(renderer)
 
 	currentUser, err := user.Current()
