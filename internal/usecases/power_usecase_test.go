@@ -193,7 +193,7 @@ func TestFarthestPowerMethod(t *testing.T) {
 			useCase := NewPowerUseCase()
 
 			// Act
-			foundEigenvalue, err := useCase.FarthestPower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
+			foundEigenvalue, err := useCase.FarthestEigenvaluePower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
 
 			// Assert
 			assert.NoError(t, err, "Expected no error for test case: %s", testCaseName)

@@ -125,7 +125,7 @@ func (u *PowerUseCase) InversePower(
 	}, nil
 }
 
-func (u *PowerUseCase) FarthestPower(
+func (u *PowerUseCase) FarthestEigenvaluePower(
 	ctx context.Context,
 	matrix [][]float64,
 	initialGuess []float64,
