@@ -19,6 +19,14 @@ type powerTestCase struct {
 	expectedEigenvector []float64
 }
 
+type shiftedPowerTestCase struct {
+	matrix             [][]float64
+	initialGuess       []float64
+	epsilon            float64
+	expectedEigenvalue float64
+	k                  float64
+}
+
 func TestRegularPowerMethod(t *testing.T) {
 	opts := &slog.HandlerOptions{
 		Level: slog.LevelDebug,
@@ -70,7 +78,7 @@ func TestRegularPowerMethod(t *testing.T) {
 				{0, -1, 1},
 			},
 			initialGuess:        []float64{1, -1, 1},
-			epsilon:             1e-5,
+			epsilon:             1e-10,
 			expectedEigenvalue:  3,
 			expectedEigenvector: []float64{1, -2, 1},
 		},
@@ -150,6 +158,46 @@ func TestInversePowerMethod(t *testing.T) {
 			assert.NoError(t, err, "Expected no error for test case: %s", testCaseName)
 			assert.InDelta(t, tc.expectedEigenvalue, result.Eigenvalue, tc.epsilon*10)
 			matchVectorsWithTolerance(t, tc.expectedEigenvector, result.Eigenvector, tc.epsilon*10)
+		})
+	}
+}
+
+func TestFarthestPowerMethod(t *testing.T) {
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+	handler := slog.NewJSONHandler(os.Stdout, opts)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+
+	// Arrange
+	t.Parallel()
+
+	tests := []shiftedPowerTestCase{
+		{
+			matrix: [][]float64{
+				{2, 6, -3},
+				{5, 3, -3},
+				{5, -4, 4},
+			},
+			initialGuess:       []float64{1, 0, 1},
+			epsilon:            1e-10,
+			expectedEigenvalue: -3,
+			k:                  4,
+		},
+	}
+
+	for _, tc := range tests {
+		testCaseName := fmt.Sprintf("%v", tc.matrix)
+		t.Run(testCaseName, func(t *testing.T) {
+			useCase := NewPowerUseCase()
+
+			// Act
+			foundEigenvalue, err := useCase.FarthestPower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
+
+			// Assert
+			assert.NoError(t, err, "Expected no error for test case: %s", testCaseName)
+			assert.InDelta(t, tc.expectedEigenvalue, foundEigenvalue, tc.epsilon*10)
 		})
 	}
 }

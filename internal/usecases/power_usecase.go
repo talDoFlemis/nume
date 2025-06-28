@@ -125,6 +125,58 @@ func (u *PowerUseCase) InversePower(
 	}, nil
 }
 
+func (u *PowerUseCase) FarthestPower(
+	ctx context.Context,
+	matrix [][]float64,
+	initialGuess []float64,
+	scalarToGoFarthest float64,
+	epsilon float64,
+	maxNumberOfIterations uint64,
+) (float64, error) {
+	slog.DebugContext(ctx, "Starting the Farthest power method",
+		slog.Any("matrix", matrix),
+		slog.Any("initialGuess", initialGuess),
+		slog.Float64("epsilon", epsilon),
+		slog.Uint64("maxNumberOfIterations", maxNumberOfIterations),
+		slog.Float64("scalarToGoFarthest", scalarToGoFarthest),
+	)
+
+	slog.DebugContext(ctx, "Creating matrix and scalar farthest matrix")
+
+	A := constructMatrix(matrix)
+	scalarFarthestMatrix := mat.NewDense(len(matrix[0]), len(matrix[0]), nil)
+	for i := 0; i < len(matrix[0]); i++ {
+		scalarFarthestMatrix.Set(i, i, -1.0*scalarToGoFarthest)
+	}
+
+	slog.DebugContext(ctx, "Scalar farthest matrix created",
+		slog.Any("scalarFarthestMatrix", scalarFarthestMatrix.RawMatrix().Data),
+	)
+
+	var matrixToFindLargestPowerResult mat.Dense
+	matrixToFindLargestPowerResult.Add(A, scalarFarthestMatrix)
+
+	slog.DebugContext(ctx, "Matrix to find largest power result",
+		slog.Any("matrixToFindLargestPowerResult", matrixToFindLargestPowerResult.RawMatrix().Data),
+	)
+
+	initialGuessVector := constructVector(initialGuess)
+
+	result, err := u.innerRegularPower(ctx, &matrixToFindLargestPowerResult, initialGuessVector, epsilon, maxNumberOfIterations)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to compute the farthest power method", slog.Any("error", err))
+		return 0.0, fmt.Errorf("failed to compute the farthest power method: %w", err)
+	}
+
+	farthestEigenvalue := result.Eigenvalue + scalarToGoFarthest
+
+	slog.InfoContext(ctx, "Finished the Farthest power method",
+		slog.Float64("farthestEigenvalue", farthestEigenvalue),
+	)
+
+	return farthestEigenvalue, nil
+}
+
 func (u *PowerUseCase) innerRegularPower(ctx context.Context,
 	matrix *mat.Dense,
 	initialGuess *mat.VecDense,
