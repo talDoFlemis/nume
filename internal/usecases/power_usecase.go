@@ -57,15 +57,96 @@ func (u *PowerUseCase) RegularPower(
 	A := constructMatrix(matrix)
 	initialGuessVector := constructVector(initialGuess)
 
+	result, err := u.innerRegularPower(ctx, A, initialGuessVector, epsilon, maxNumberOfIterations)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to compute the regular power method", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to compute the regular power method: %w", err)
+	}
+
+	slog.InfoContext(ctx, "Finished the regular power method",
+		slog.Float64("bestEigenvalue", result.Eigenvalue),
+		slog.String("bestEigenvector", fmt.Sprintf("%v", result.Eigenvector)),
+		slog.Uint64("numIterations", result.NumIterations),
+		slog.Float64("epsilon", epsilon),
+	)
+
+	return result, nil
+}
+
+func (u *PowerUseCase) InversePower(
+	ctx context.Context,
+	matrix [][]float64,
+	initialGuess []float64,
+	epsilon float64,
+	maxNumberOfIterations uint64,
+) (*PowerResult, error) {
+	slog.DebugContext(ctx, "Starting the inverse power method",
+		slog.Any("matrix", matrix),
+		slog.Any("initialGuess", initialGuess),
+		slog.Float64("epsilon", epsilon),
+		slog.Uint64("maxNumberOfIterations", maxNumberOfIterations),
+	)
+
+	originalMatrix := constructMatrix(matrix)
+
+	var inverseMatrix mat.Dense
+
+	slog.DebugContext(ctx, "Computing the inverse of the matrix")
+	err := inverseMatrix.Inverse(originalMatrix)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to compute the inverse of the matrix", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to compute the inverse of the matrix: %w", err)
+	}
+
+	slog.DebugContext(ctx, "Inverse matrix computed successfully",
+		slog.Any("inverseMatrix", inverseMatrix.RawMatrix().Data),
+	)
+
+	result, err := u.innerRegularPower(ctx, &inverseMatrix, constructVector(initialGuess), epsilon, maxNumberOfIterations)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to compute the inverse power method", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to compute the inverse power method: %w", err)
+	}
+
+	// Normalize the eigenvector with the real eigenvalue
+	eigenvalue := 1.0 / result.Eigenvalue
+
+	slog.InfoContext(ctx, "Finished the inverse power method",
+		slog.Float64("bestEigenvalue", eigenvalue),
+		slog.String("bestEigenvector", fmt.Sprintf("%v", result.Eigenvector)),
+		slog.Uint64("numIterations", result.NumIterations),
+		slog.Float64("epsilon", epsilon),
+	)
+
+	return &PowerResult{
+		Eigenvector:   result.Eigenvector,
+		Eigenvalue:    eigenvalue,
+		NumIterations: result.NumIterations,
+	}, nil
+}
+
+func (u *PowerUseCase) innerRegularPower(ctx context.Context,
+	matrix *mat.Dense,
+	initialGuess *mat.VecDense,
+	epsilon float64,
+	maxNumberOfIterations uint64,
+) (*PowerResult, error) {
+	slog.DebugContext(ctx, "Starting the inner regular power method",
+		slog.Any("matrix", matrix.RawMatrix().Data),
+		slog.Any("initialGuess", initialGuess.RawVector().Data),
+		slog.Float64("epsilon", epsilon),
+		slog.Uint64("maxNumberOfIterations", maxNumberOfIterations),
+	)
+
 	slog.DebugContext(ctx, "Normalizing the initial guess vector")
 
-	bestEigenvector := mat.NewVecDense(initialGuessVector.Len(), nil)
+	bestEigenvector := mat.NewVecDense(initialGuess.Len(), nil)
 	// Normalize the initialGuess vector
-	bestEigenvector.ScaleVec(1/initialGuessVector.Norm(2), initialGuessVector)
+	bestEigenvector.ScaleVec(1/initialGuess.Norm(2), initialGuess)
 
 	currentError := math.Inf(1)
 	currentIteration := uint64(0)
-	Y := mat.NewVecDense(initialGuessVector.Len(), nil)
+	Y := mat.NewVecDense(initialGuess.Len(), nil)
 
 	var bestEigenvalue float64
 
@@ -79,9 +160,9 @@ func (u *PowerUseCase) RegularPower(
 			slog.Float64("bestEigenvalue", bestEigenvalue),
 		)
 
-		Y.MulVec(A, bestEigenvector)
+		Y.MulVec(matrix, bestEigenvector)
 
-		slog.DebugContext(ctx, "Multiplying matrix A with the current Y eigenvector",
+		slog.DebugContext(ctx, "Multiplying matrix A with the calcualted Y eigenvector",
 			slog.String("Y", fmt.Sprintf("%v", Y.RawVector().Data)),
 		)
 
@@ -94,12 +175,9 @@ func (u *PowerUseCase) RegularPower(
 		}
 
 		// Takes the largest element in absolute value from Y
-		possibleBestEigenvalue := Y.AtVec(0)
-		for _, element := range Y.RawVector().Data {
-			if math.Abs(element) > possibleBestEigenvalue {
-				possibleBestEigenvalue = element
-			}
-		}
+		possibleBestEigenvalue := mat.Dot(Y, bestEigenvector)
+
+		bestEigenvector.ScaleVec(1/normY, Y)
 
 		slog.DebugContext(ctx, "Largest absolute element in Y",
 			slog.Float64("largestElement", possibleBestEigenvalue),
@@ -114,9 +192,6 @@ func (u *PowerUseCase) RegularPower(
 		currentError = iterationError
 		bestEigenvalue = possibleBestEigenvalue
 
-		// Scale down the the best eigenvector to be a fraction of the eigenvalue from the multiplication from the previous iteration with A
-		bestEigenvector.ScaleVec(1/bestEigenvalue, Y)
-
 		if iterationError < epsilon {
 			slog.DebugContext(ctx, "The current error is less than epsilon, stopping the iterations",
 				slog.Float64("iterationError", iterationError),
@@ -126,7 +201,7 @@ func (u *PowerUseCase) RegularPower(
 		}
 	}
 
-	slog.InfoContext(ctx, "Finished the regular power method",
+	slog.InfoContext(ctx, "Finished the inner regular power method",
 		slog.Float64("bestEigenvalue", bestEigenvalue),
 		slog.String("bestEigenvector", fmt.Sprintf("%v", bestEigenvector.RawVector().Data)),
 		slog.Uint64("numIterations", currentIteration),
