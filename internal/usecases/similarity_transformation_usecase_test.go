@@ -371,6 +371,279 @@ func TestHouseholderWithQRIntegration(t *testing.T) {
 	}
 }
 
+type completeEigenDecompositionTest struct {
+	name                 string
+	inputMatrix          [][]float64
+	expectedEigenvalues  []float64
+	expectedEigenvectors [][]float64 // Each column is an eigenvector
+	epsilon              float64
+	maxIterations        int
+	tolerance            float64
+	description          string
+}
+
+func TestCompleteEigenDecomposition(t *testing.T) {
+	// Arrange
+	t.Parallel()
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}
+	handler := slog.NewJSONHandler(os.Stdout, opts)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+
+	tests := []completeEigenDecompositionTest{
+		{
+			name: "3x3 symmetric matrix - general case",
+			inputMatrix: [][]float64{
+				{4, 1, -2},
+				{1, 2, 0},
+				{-2, 0, 3},
+			},
+			expectedEigenvalues: []float64{5.73, 2.27, 1.00}, // Approximate values
+			expectedEigenvectors: [][]float64{
+				{0.788675, 0.577350, 0.211325},
+				{0.211325, -0.577350, 0.788675},
+				{-0.577350, 0.577350, 0.577350},
+			},
+			epsilon:       0.2,
+			maxIterations: 1000,
+			tolerance:     1e-10,
+			description:   "General 3x3 symmetric matrix with mixed positive eigenvalues",
+		},
+		{
+			name: "3x3 diagonal matrix",
+			inputMatrix: [][]float64{
+				{5, 0, 0},
+				{0, 3, 0},
+				{0, 0, 1},
+			},
+			expectedEigenvalues: []float64{5.0, 3.0, 1.0},
+			expectedEigenvectors: [][]float64{
+				{1.0, 0.0, 0.0},
+				{0.0, 1.0, 0.0},
+				{0.0, 0.0, 1.0},
+			},
+			epsilon:       1e-10,
+			maxIterations: 100,
+			tolerance:     1e-12,
+			description:   "Already diagonal matrix - eigenvalues should be exact",
+		},
+		{
+			name: "3x3 tridiagonal matrix",
+			inputMatrix: [][]float64{
+				{2, -1, 0},
+				{-1, 2, -1},
+				{0, -1, 2},
+			},
+			expectedEigenvalues: []float64{3.414, 2.0, 0.586}, // 2 + sqrt(2), 2, 2 - sqrt(2)
+			expectedEigenvectors: [][]float64{
+				{0.5, -0.707107, 0.5},
+				{-0.707107, 0.0, 0.707107},
+				{0.5, 0.707107, 0.5},
+			},
+			epsilon:       1e-2,
+			maxIterations: 1000,
+			tolerance:     1e-10,
+			description:   "Tridiagonal matrix with known analytical eigenvalues",
+		},
+		{
+			name: "4x4 symmetric matrix",
+			inputMatrix: [][]float64{
+				{4, 1, -1, 0},
+				{1, 4, 1, -1},
+				{-1, 1, 4, 1},
+				{0, -1, 1, 4},
+			},
+			expectedEigenvalues: []float64{5.56, 5.0, 4.0, 1.44}, // Computed values
+			expectedEigenvectors: [][]float64{
+				{-0.435162, -0.707107, -0.557345, 0.0},
+				{0.557345, 0.0, -0.435162, -0.707107},
+				{-0.557345, 0.0, 0.435162, -0.707107},
+				{0.435162, -0.707107, 0.557345, 0.0},
+			},
+			epsilon:       0.1,
+			maxIterations: 1000,
+			tolerance:     1e-10,
+			description:   "4x4 symmetric matrix to test scalability",
+		},
+		{
+			name: "2x2 simple matrix",
+			inputMatrix: [][]float64{
+				{3, 1},
+				{1, 3},
+			},
+			expectedEigenvalues: []float64{4.0, 2.0}, // Exact: 3 ± 1
+			expectedEigenvectors: [][]float64{
+				{0.707107, -0.707107},
+				{0.707107, 0.707107},
+			},
+			epsilon:       1e-10,
+			maxIterations: 100,
+			tolerance:     1e-12,
+			description:   "Simple 2x2 case with known exact eigenvalues",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			useCase := NewSimilarityTransformationUseCase()
+			ctx := context.Background()
+
+			// Act - Run complete eigendecomposition
+			result, err := useCase.CompleteEigenDecomposition(ctx, tc.inputMatrix, tc.maxIterations, tc.tolerance)
+
+			// Assert
+			assert.NoError(t, err, "CompleteEigenDecomposition should not return error")
+			assert.NotNil(t, result, "Result should not be nil")
+			assert.NotNil(t, result.Eigenvalues, "Eigenvalues should not be nil")
+			assert.NotNil(t, result.Eigenvectors, "Eigenvectors should not be nil")
+
+			// Check eigenvalue count
+			n := len(tc.inputMatrix)
+			assert.Len(t, result.Eigenvalues, n, "Should have %d eigenvalues", n)
+
+			// Check eigenvector dimensions
+			rows, cols := result.Eigenvectors.Dims()
+			assert.Equal(t, n, rows, "Eigenvectors should have %d rows", n)
+			assert.Equal(t, n, cols, "Eigenvectors should have %d columns", n)
+
+			// Sort eigenvalues for comparison
+			eigenvals := make([]float64, len(result.Eigenvalues))
+			copy(eigenvals, result.Eigenvalues)
+			sortFloat64Slice(eigenvals)
+			
+			expectedSorted := make([]float64, len(tc.expectedEigenvalues))
+			copy(expectedSorted, tc.expectedEigenvalues)
+			sortFloat64Slice(expectedSorted)
+
+			// Verify eigenvalues
+			for i, expected := range expectedSorted {
+				assert.InDelta(t, expected, eigenvals[i], tc.epsilon,
+					"Eigenvalue %d mismatch: expected %f, got %f", i, expected, eigenvals[i])
+			}
+
+			// Verify eigenvectors by checking mathematical properties
+			// Rather than exact comparison (which can fail due to ordering/sign), we verify:
+			// 1. Each computed eigenvector has the right properties
+			// 2. If expected eigenvectors are provided, we check for reasonable similarity
+			if tc.expectedEigenvectors != nil {
+				t.Logf("Verifying eigenvector properties and similarity to expected values...")
+				
+				// For each computed eigenvector, find the best matching expected eigenvector
+				for computedIdx := 0; computedIdx < n; computedIdx++ {
+					computedEigenvector := mat.NewVecDense(n, nil)
+					for j := 0; j < n; j++ {
+						computedEigenvector.SetVec(j, result.Eigenvectors.At(j, computedIdx))
+					}
+					
+					// Normalize computed eigenvector
+					computedNorm := computedEigenvector.Norm(2)
+					if computedNorm > 1e-10 {
+						computedEigenvector.ScaleVec(1.0/computedNorm, computedEigenvector)
+					}
+					
+					// Find the best matching expected eigenvector (highest absolute dot product)
+					bestMatch := -1
+					bestDotProduct := 0.0
+					
+					for expectedIdx := 0; expectedIdx < len(tc.expectedEigenvectors[0]); expectedIdx++ {
+						expectedEigenvector := mat.NewVecDense(n, nil)
+						for j := 0; j < n; j++ {
+							expectedEigenvector.SetVec(j, tc.expectedEigenvectors[j][expectedIdx])
+						}
+						
+						// Normalize expected eigenvector
+						expectedNorm := expectedEigenvector.Norm(2)
+						if expectedNorm > 1e-10 {
+							expectedEigenvector.ScaleVec(1.0/expectedNorm, expectedEigenvector)
+						}
+						
+						dotProduct := math.Abs(mat.Dot(computedEigenvector, expectedEigenvector))
+						if dotProduct > bestDotProduct {
+							bestDotProduct = dotProduct
+							bestMatch = expectedIdx
+						}
+					}
+					
+					// Check if we found a reasonable match
+					if bestMatch >= 0 && bestDotProduct > (1.0 - tc.epsilon) {
+						t.Logf("✅ Computed eigenvector %d matches expected eigenvector %d (similarity: %.6f)", 
+							computedIdx, bestMatch, bestDotProduct)
+					} else if bestMatch >= 0 {
+						t.Logf("⚠️  Computed eigenvector %d partially matches expected eigenvector %d (similarity: %.6f)", 
+							computedIdx, bestMatch, bestDotProduct)
+					} else {
+						t.Logf("❓ Computed eigenvector %d has no close match in expected eigenvectors", computedIdx)
+					}
+				}
+			}
+
+			// Verify eigenvalue-eigenvector relationship: A*v = λ*v
+			originalMatrix := constructMatrix(tc.inputMatrix)
+			
+			for i := 0; i < n; i++ {
+				// Extract eigenvector i
+				eigenvector := mat.NewVecDense(n, nil)
+				for j := 0; j < n; j++ {
+					eigenvector.SetVec(j, result.Eigenvectors.At(j, i))
+				}
+				
+				// Compute A*v
+				var av mat.VecDense
+				av.MulVec(originalMatrix, eigenvector)
+				
+				// Compute λ*v
+				var lambdav mat.VecDense
+				lambdav.ScaleVec(result.Eigenvalues[i], eigenvector)
+				
+				// Check if A*v ≈ λ*v
+				for j := 0; j < n; j++ {
+					assert.InDelta(t, av.AtVec(j), lambdav.AtVec(j), math.Max(tc.epsilon, 1e-8),
+						"Eigenvalue-eigenvector relationship violated for eigenvalue %d, component %d: A*v[%d] = %f, λ*v[%d] = %f", 
+						i, j, j, av.AtVec(j), j, lambdav.AtVec(j))
+				}
+			}
+
+			// Verify eigenvectors are orthogonal (should be orthonormal)
+			var vTv mat.Dense
+			vTv.Mul(result.Eigenvectors.T(), result.Eigenvectors)
+			
+			for i := 0; i < n; i++ {
+				for j := 0; j < n; j++ {
+					expected := 0.0
+					if i == j {
+						expected = 1.0
+					}
+					assert.InDelta(t, expected, vTv.At(i, j), math.Max(tc.epsilon, 1e-8),
+						"Eigenvectors should be orthonormal: V^T*V[%d,%d] = %f, expected %f", i, j, vTv.At(i, j), expected)
+				}
+			}
+
+			// Verify reconstruction: A = V * Λ * V^T
+			eigenvalueMatrix := mat.NewDense(n, n, nil)
+			for i := 0; i < n; i++ {
+				eigenvalueMatrix.Set(i, i, result.Eigenvalues[i])
+			}
+			
+			var temp mat.Dense
+			temp.Mul(result.Eigenvectors, eigenvalueMatrix)
+			
+			var reconstructed mat.Dense
+			reconstructed.Mul(&temp, result.Eigenvectors.T())
+			
+			// Compare reconstructed matrix with original
+			for i := range n {
+				for j := range n {
+					assert.InDelta(t, tc.inputMatrix[i][j], reconstructed.At(i, j), math.Max(tc.epsilon, 1e-8),
+						"Matrix reconstruction failed at [%d,%d]: original = %f, reconstructed = %f", 
+						i, j, tc.inputMatrix[i][j], reconstructed.At(i, j))
+				}
+			}
+		})
+	}
+}
+
 // Helper functions
 func sortFloat64Slice(slice []float64) {
 	for i := 0; i < len(slice)-1; i++ {

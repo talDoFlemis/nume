@@ -209,6 +209,38 @@ func (u *SimilarityTransformationUseCase) QRMethod(ctx context.Context, tridiago
 	}, nil
 }
 
+// CompleteEigenDecomposition performs the complete eigenvalue decomposition of a symmetric matrix
+// It combines Householder tridiagonalization and QR iteration to find all eigenvalues and eigenvectors
+func (u *SimilarityTransformationUseCase) CompleteEigenDecomposition(ctx context.Context, matrix [][]float64, maxIterations int, tolerance float64) (*QRMethodResult, error) {
+	slog.InfoContext(ctx, "Starting complete eigenvalue decomposition",
+		slog.Any("matrix", matrix),
+		slog.Int("maxIterations", maxIterations),
+		slog.Float64("tolerance", tolerance),
+	)
+
+	// Step 1: Apply Householder method to reduce to tridiagonal form
+	householderResult, err := u.HouseholderMethod(ctx, matrix)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error in Householder method", slog.Any("error", err))
+		return nil, fmt.Errorf("householder method failed: %w", err)
+	}
+
+	slog.InfoContext(ctx, "Householder method completed successfully")
+
+	// Step 2: Apply QR method to find eigenvalues and eigenvectors
+	qrResult, err := u.QRMethod(ctx, householderResult.TriangulizedMatrix, householderResult.HouseholderMatrix, maxIterations, tolerance)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error in QR method", slog.Any("error", err))
+		return nil, fmt.Errorf("QR method failed: %w", err)
+	}
+
+	slog.InfoContext(ctx, "Complete eigenvalue decomposition finished successfully",
+		slog.Any("eigenvalues", qrResult.Eigenvalues),
+	)
+
+	return qrResult, nil
+}
+
 // Manual QR decomposition using Givens rotations
 // This is particularly efficient for tridiagonal matrices
 func qrDecompositionGivens(A *mat.Dense) (*mat.Dense, *mat.Dense) {
