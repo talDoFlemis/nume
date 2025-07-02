@@ -20,7 +20,6 @@ func gracefulShutdown(
 	done chan bool,
 	shutdownTimeoutInSeconds int,
 ) {
-	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(),
 		syscall.SIGINT,
 		syscall.SIGTERM,

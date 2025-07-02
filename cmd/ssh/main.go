@@ -25,7 +25,6 @@ func gracefulShutdown(
 	done chan bool,
 	shutdownTimeoutInSeconds int,
 ) {
-	// Create context that listens for the interrupt signal from the OS.
 	ctx, stop := signal.NotifyContext(context.Background(),
 		syscall.SIGINT,
 		syscall.SIGTERM,
@@ -37,8 +36,6 @@ func gracefulShutdown(
 
 	slog.Info("shutting down gracefully. press Ctrl+C again to force")
 
-	// The context is used to inform the server it has 5 seconds to finish
-	// the request it is currently handling
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
 		time.Duration(shutdownTimeoutInSeconds)*time.Second,
