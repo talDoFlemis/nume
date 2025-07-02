@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"os/user"
 
@@ -14,6 +15,16 @@ import (
 func main() {
 	// Start with the welcome screen
 	renderer := lipgloss.DefaultRenderer()
+
+	file, err := os.OpenFile("nume.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Error opening log file: %v", err)
+	}
+	hander := slog.NewJSONHandler(file, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
+
+	slog.SetDefault(slog.New(hander))
 
 	theme := models.ThemeCatppuccin(renderer)
 
