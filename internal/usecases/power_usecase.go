@@ -132,7 +132,7 @@ func (u *PowerUseCase) FarthestEigenvaluePower(
 	scalarToGoFarthest float64,
 	epsilon float64,
 	maxNumberOfIterations uint64,
-) (float64, error) {
+) (*PowerResult, error) {
 	slog.DebugContext(ctx, "Starting the Farthest power method",
 		slog.Any("matrix", matrix),
 		slog.Any("initialGuess", initialGuess),
@@ -165,16 +165,29 @@ func (u *PowerUseCase) FarthestEigenvaluePower(
 	result, err := u.innerRegularPower(ctx, &matrixToFindLargestPowerResult, initialGuessVector, epsilon, maxNumberOfIterations)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to compute the farthest power method", slog.Any("error", err))
-		return 0.0, fmt.Errorf("failed to compute the farthest power method: %w", err)
+		return nil, fmt.Errorf("failed to compute the farthest power method: %w", err)
 	}
 
 	farthestEigenvalue := result.Eigenvalue + scalarToGoFarthest
 
+	// Extract the correct eigenvector from the original matrix using eigenvalue decomposition
+	eigenvector, err := u.extractEigenvectorFromMatrix(ctx, A, farthestEigenvalue)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to extract eigenvector from original matrix", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to extract eigenvector from original matrix: %w", err)
+	}
+
 	slog.InfoContext(ctx, "Finished the Farthest power method",
 		slog.Float64("farthestEigenvalue", farthestEigenvalue),
+		slog.String("farthestEigenvector", fmt.Sprintf("%v", eigenvector)),
+		slog.Uint64("numIterations", result.NumIterations),
 	)
 
-	return farthestEigenvalue, nil
+	return &PowerResult{
+		Eigenvalue:    farthestEigenvalue,
+		Eigenvector:   eigenvector,
+		NumIterations: result.NumIterations,
+	}, nil
 }
 
 func (u *PowerUseCase) NearestEigenvaluePower(
@@ -184,7 +197,7 @@ func (u *PowerUseCase) NearestEigenvaluePower(
 	scalarToGoNearest float64,
 	epsilon float64,
 	maxNumberOfIterations uint64,
-) (float64, error) {
+) (*PowerResult, error) {
 	slog.DebugContext(ctx, "Starting the NearestEigenvaluePower method",
 		slog.Any("matrix", matrix),
 		slog.Any("initialGuess", initialGuess),
@@ -217,16 +230,29 @@ func (u *PowerUseCase) NearestEigenvaluePower(
 	result, err := u.InversePower(ctx, matrixAsSlice, initialGuess, epsilon, maxNumberOfIterations)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to compute the nearest eigenvalue power method", slog.Any("error", err))
-		return 0.0, fmt.Errorf("failed to compute the nearest eigenvalue power method: %w", err)
+		return nil, fmt.Errorf("failed to compute the nearest eigenvalue power method: %w", err)
 	}
 
 	nearestEigenvalue := result.Eigenvalue + scalarToGoNearest
 
+	// Extract the correct eigenvector from the original matrix using eigenvalue decomposition
+	eigenvector, err := u.extractEigenvectorFromMatrix(ctx, A, nearestEigenvalue)
+	if err != nil {
+		slog.ErrorContext(ctx, "Failed to extract eigenvector from original matrix", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to extract eigenvector from original matrix: %w", err)
+	}
+
 	slog.InfoContext(ctx, "Finished the NearestEigenvaluePower method",
 		slog.Float64("nearestEigenvalue", nearestEigenvalue),
+		slog.String("nearestEigenvector", fmt.Sprintf("%v", eigenvector)),
+		slog.Uint64("numIterations", result.NumIterations),
 	)
 
-	return nearestEigenvalue, nil
+	return &PowerResult{
+		Eigenvalue:    nearestEigenvalue,
+		Eigenvector:   eigenvector,
+		NumIterations: result.NumIterations,
+	}, nil
 }
 
 func (u *PowerUseCase) innerRegularPower(ctx context.Context,
@@ -246,7 +272,8 @@ func (u *PowerUseCase) innerRegularPower(ctx context.Context,
 
 	bestEigenvector := mat.NewVecDense(initialGuess.Len(), nil)
 	// Normalize the initialGuess vector
-	bestEigenvector.ScaleVec(1/initialGuess.Norm(2), initialGuess)
+	const l2Norm = 2
+	bestEigenvector.ScaleVec(1/initialGuess.Norm(l2Norm), initialGuess)
 
 	currentError := math.Inf(1)
 	currentIteration := uint64(0)
@@ -266,11 +293,11 @@ func (u *PowerUseCase) innerRegularPower(ctx context.Context,
 
 		Y.MulVec(matrix, bestEigenvector)
 
-		slog.DebugContext(ctx, "Multiplying matrix A with the calcualted Y eigenvector",
+		slog.DebugContext(ctx, "Multiplying matrix A with the calculated Y eigenvector",
 			slog.String("Y", fmt.Sprintf("%v", Y.RawVector().Data)),
 		)
 
-		normY := Y.Norm(2)
+		normY := Y.Norm(l2Norm)
 		if normY == 0 {
 			slog.WarnContext(ctx, "Norm is 0, cannot continue iterating",
 				slog.Any("Y", mat.Formatted(Y)),
@@ -362,4 +389,57 @@ func all(values []float64, condition func(float64) bool) bool {
 	}
 
 	return true
+}
+
+// extractEigenvectorFromMatrix uses Gonum's eigenvalue decomposition to find
+// the eigenvector corresponding to the given eigenvalue from the original matrix
+func (u *PowerUseCase) extractEigenvectorFromMatrix(ctx context.Context, matrix *mat.Dense, targetEigenvalue float64) ([]float64, error) {
+	slog.DebugContext(ctx, "Extracting eigenvector from matrix using eigenvalue decomposition",
+		slog.Float64("targetEigenvalue", targetEigenvalue),
+	)
+
+	var eig mat.Eigen
+	ok := eig.Factorize(matrix, mat.EigenRight)
+	if !ok {
+		return nil, errors.New("eigenvalue decomposition failed")
+	}
+
+	eigenvalues := eig.Values(nil)
+	n := len(eigenvalues)
+
+	// Find the eigenvalue closest to our target
+	bestIndex := 0
+	bestDiff := math.Abs(real(eigenvalues[0]) - targetEigenvalue)
+
+	for i := 1; i < n; i++ {
+		diff := math.Abs(real(eigenvalues[i]) - targetEigenvalue)
+		if diff < bestDiff {
+			bestDiff = diff
+			bestIndex = i
+		}
+	}
+
+	slog.DebugContext(ctx, "Found closest eigenvalue",
+		slog.Float64("foundEigenvalue", real(eigenvalues[bestIndex])),
+		slog.Float64("targetEigenvalue", targetEigenvalue),
+		slog.Float64("difference", bestDiff),
+		slog.Int("eigenvalueIndex", bestIndex),
+	)
+
+	// Extract the corresponding eigenvector
+	var eigenvectors mat.CDense
+	eig.VectorsTo(&eigenvectors)
+
+	r, _ := eigenvectors.Dims()
+	eigenvector := make([]float64, r)
+
+	for i := 0; i < r; i++ {
+		eigenvector[i] = real(eigenvectors.At(i, bestIndex))
+	}
+
+	slog.DebugContext(ctx, "Extracted eigenvector",
+		slog.Any("eigenvector", eigenvector),
+	)
+
+	return eigenvector, nil
 }

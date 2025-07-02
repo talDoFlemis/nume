@@ -706,24 +706,10 @@ func (m *EigenModel) generateResult() {
 		powerResult, err = m.useCase.InversePower(ctx, matrix, m.initialVector, m.epsilon, m.maxIterations)
 	case PowerMethodFarthest:
 		// For farthest, we use the k eigenvalue as shift value
-		eigenvalue, err := m.useCase.FarthestEigenvaluePower(ctx, matrix, m.initialVector, m.kEigenvalue, m.epsilon, m.maxIterations)
-		if err == nil {
-			powerResult = &usecases.PowerResult{
-				Eigenvalue:    eigenvalue,
-				Eigenvector:   m.initialVector, // Simplified - actual eigenvector calculation needed
-				NumIterations: m.maxIterations, // Simplified
-			}
-		}
+		powerResult, err = m.useCase.FarthestEigenvaluePower(ctx, matrix, m.initialVector, m.kEigenvalue, m.epsilon, m.maxIterations)
 	case PowerMethodNearest:
 		// For nearest, we use the k eigenvalue as shift value
-		eigenvalue, err := m.useCase.NearestEigenvaluePower(ctx, matrix, m.initialVector, m.kEigenvalue, m.epsilon, m.maxIterations)
-		if err == nil {
-			powerResult = &usecases.PowerResult{
-				Eigenvalue:    eigenvalue,
-				Eigenvector:   m.initialVector, // Simplified - actual eigenvector calculation needed
-				NumIterations: m.maxIterations, // Simplified
-			}
-		}
+		powerResult, err = m.useCase.NearestEigenvaluePower(ctx, matrix, m.initialVector, m.kEigenvalue, m.epsilon, m.maxIterations)
 	default:
 		m.result = m.Focused.ErrorMessage.Render("Unknown power method selected")
 		return

@@ -20,11 +20,12 @@ type powerTestCase struct {
 }
 
 type shiftedPowerTestCase struct {
-	matrix             [][]float64
-	initialGuess       []float64
-	epsilon            float64
-	expectedEigenvalue float64
-	k                  float64
+	matrix              [][]float64
+	initialGuess        []float64
+	epsilon             float64
+	expectedEigenvalue  float64
+	expectedEigenvector []float64
+	k                   float64
 }
 
 func TestRegularPowerMethod(t *testing.T) {
@@ -176,14 +177,15 @@ func TestFarthestPowerMethod(t *testing.T) {
 	tests := []shiftedPowerTestCase{
 		{
 			matrix: [][]float64{
-				{2, 6, -3},
-				{5, 3, -3},
-				{5, -4, 4},
+				{10, 6, 7},
+				{1, 7, -2},
+				{2, 2, 2},
 			},
-			initialGuess:       []float64{1, 0, 1},
-			epsilon:            1e-10,
-			expectedEigenvalue: -3,
-			k:                  4,
+			initialGuess:        []float64{1, 1, 1},
+			epsilon:             1e-10,
+			expectedEigenvalue:  (math.Sqrt(129) + 13.0) / 2.0,
+			expectedEigenvector: []float64{(math.Sqrt(129) + 7.0) / 4.0, 0.5, 1},
+			k:                   0,
 		},
 	}
 
@@ -193,11 +195,14 @@ func TestFarthestPowerMethod(t *testing.T) {
 			useCase := NewPowerUseCase()
 
 			// Act
-			foundEigenvalue, err := useCase.FarthestEigenvaluePower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
+			result, err := useCase.FarthestEigenvaluePower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
 
 			// Assert
 			assert.NoError(t, err, "Expected no error for test case: %s", testCaseName)
-			assert.InDelta(t, tc.expectedEigenvalue, foundEigenvalue, tc.epsilon*10)
+			assert.InDelta(t, tc.expectedEigenvalue, result.Eigenvalue, tc.epsilon*10)
+			assert.NotNil(t, result.Eigenvector, "Expected eigenvector to be returned")
+			assert.Greater(t, result.NumIterations, uint64(0), "Expected number of iterations to be greater than 0")
+			matchVectorsWithTolerance(t, tc.expectedEigenvector, result.Eigenvector, tc.epsilon*10)
 		})
 	}
 }
@@ -220,10 +225,11 @@ func TestNearestEigenvaluePowerMethod(t *testing.T) {
 				{1, 7, -2},
 				{2, 2, 2},
 			},
-			initialGuess:       []float64{1, 1, 1},
-			epsilon:            1e-10,
-			expectedEigenvalue: 6,
-			k:                  5,
+			initialGuess:        []float64{1, 1, 1},
+			epsilon:             1e-10,
+			expectedEigenvalue:  6,
+			expectedEigenvector: []float64{9.5, -7.5, 1},
+			k:                   5,
 		},
 	}
 
@@ -233,11 +239,14 @@ func TestNearestEigenvaluePowerMethod(t *testing.T) {
 			useCase := NewPowerUseCase()
 
 			// Act
-			foundEigenvalue, err := useCase.NearestEigenvaluePower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
+			result, err := useCase.NearestEigenvaluePower(t.Context(), tc.matrix, tc.initialGuess, tc.k, tc.epsilon, 100)
 
 			// Assert
 			assert.NoError(t, err, "Expected no error for test case: %s", testCaseName)
-			assert.InDelta(t, tc.expectedEigenvalue, foundEigenvalue, tc.epsilon*10)
+			assert.InDelta(t, tc.expectedEigenvalue, result.Eigenvalue, tc.epsilon*10)
+			assert.NotNil(t, result.Eigenvector, "Expected eigenvector to be returned")
+			assert.Greater(t, result.NumIterations, uint64(0), "Expected number of iterations to be greater than 0")
+			matchVectorsWithTolerance(t, tc.expectedEigenvector, result.Eigenvector, tc.epsilon*10)
 		})
 	}
 }
