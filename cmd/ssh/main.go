@@ -31,7 +31,6 @@ func gracefulShutdown(
 	)
 	defer stop()
 
-	// Listen for the interrupt signal.
 	<-ctx.Done()
 
 	slog.Info("shutting down gracefully. press Ctrl+C again to force")
