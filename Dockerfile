@@ -25,10 +25,9 @@ WORKDIR /app
 
 
 COPY --from=builder /app/server ./
-COPY .ssh /app/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=user /etc/passwd /etc/passwd
-COPY --from=user --chown=scratchuser:scratchuser /home/scratchuser/.ssh /app/.ssh
+COPY .ssh /app/.ssh
 
 USER scratchuser
 STOPSIGNAL SIGINT
