@@ -621,3 +621,163 @@
 {"time":"2025-07-02T10:06:50.488212349-03:00","level":"DEBUG","msg":"Found closest eigenvalue","foundEigenvalue":-1,"targetEigenvalue":-1.0000000283210766,"difference":2.8321076595005934e-8,"eigenvalueIndex":0}
 {"time":"2025-07-02T10:06:50.488229602-03:00","level":"DEBUG","msg":"Extracted eigenvector","eigenvector":[-0.7071067811865475,0.7071067811865475]}
 {"time":"2025-07-02T10:06:50.488238458-03:00","level":"INFO","msg":"Finished the NearestEigenvaluePower method","nearestEigenvalue":-1.0000000283210766,"nearestEigenvector":"[-0.7071067811865475 0.7071067811865475]","numIterations":10}
+{"time":"2025-07-02T10:08:13.436675558-03:00","level":"DEBUG","msg":"Starting the regular power method","matrix":[[2,3],[5,4]],"initialGuess":[1,1],"epsilon":0.000001,"maxNumberOfIterations":100}
+{"time":"2025-07-02T10:08:13.436778321-03:00","level":"DEBUG","msg":"Starting the inner regular power method","matrix":[2,3,5,4],"initialGuess":[1,1],"epsilon":0.000001,"maxNumberOfIterations":100}
+{"time":"2025-07-02T10:08:13.436788019-03:00","level":"DEBUG","msg":"Normalizing the initial guess vector"}
+{"time":"2025-07-02T10:08:13.436824607-03:00","level":"DEBUG","msg":"Iteration","iteration":1,"currentError":"!ERROR:json: unsupported value: +Inf","bestEigenvector":"[0.7071067811865475 0.7071067811865475]","bestEigenvalue":0}
+{"time":"2025-07-02T10:08:13.436856076-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.5355339059327373 6.363961030678928]"}
+{"time":"2025-07-02T10:08:13.436865013-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.999999999999998}
+{"time":"2025-07-02T10:08:13.436873599-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":1}
+{"time":"2025-07-02T10:08:13.436880452-03:00","level":"DEBUG","msg":"Iteration","iteration":2,"currentError":1,"bestEigenvector":"[0.4856429311786321 0.8741572761215378]","bestEigenvalue":6.999999999999998}
+{"time":"2025-07-02T10:08:13.436889048-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.5937576907218776 5.9248437603793125]"}
+{"time":"2025-07-02T10:08:13.43689545-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.924528301886794}
+{"time":"2025-07-02T10:08:13.436910087-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.010899182561307383}
+{"time":"2025-07-02T10:08:13.436915878-03:00","level":"DEBUG","msg":"Iteration","iteration":3,"currentError":0.010899182561307383,"bestEigenvector":"[0.5186123240269295 0.8550095071795325]","bestEigenvalue":6.924528301886794}
+{"time":"2025-07-02T10:08:13.436921709-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.6022531695924567 6.013099648852777]"}
+{"time":"2025-07-02T10:08:13.436925766-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.00943025540275}
+{"time":"2025-07-02T10:08:13.436930355-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.012112532748366309}
+{"time":"2025-07-02T10:08:13.436935835-03:00","level":"DEBUG","msg":"Iteration","iteration":4,"currentError":0.012112532748366309,"bestEigenvector":"[0.5139075049729083 0.8578456016862942]","bestEigenvalue":7.00943025540275}
+{"time":"2025-07-02T10:08:13.43694358-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.601351815004699 6.000919931609719]"}
+{"time":"2025-07-02T10:08:13.43694895-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.998624495181735}
+{"time":"2025-07-02T10:08:13.436953067-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.0015439834253793525}
+{"time":"2025-07-02T10:08:13.43696014-03:00","level":"DEBUG","msg":"Iteration","iteration":5,"currentError":0.0015439834253793525,"bestEigenvector":"[0.5145797879354744 0.8574425006076397]","bestEigenvalue":6.998624495181735}
+{"time":"2025-07-02T10:08:13.436965841-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.601487077693868 6.002668942107931]"}
+{"time":"2025-07-02T10:08:13.436970279-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.000195924732902}
+{"time":"2025-07-02T10:08:13.436975579-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00022448365275251216}
+{"time":"2025-07-02T10:08:13.436980398-03:00","level":"DEBUG","msg":"Iteration","iteration":6,"currentError":0.00022448365275251216,"bestEigenvector":"[0.5144837507162424 0.8575001284250326]","bestEigenvalue":7.000195924732902}
+{"time":"2025-07-02T10:08:13.43698645-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.6014678867075824 6.002419267281343]"}
+{"time":"2025-07-02T10:08:13.436990187-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.999971998992058}
+{"time":"2025-07-02T10:08:13.436994164-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00003198951951183662}
+{"time":"2025-07-02T10:08:13.436998883-03:00","level":"DEBUG","msg":"Iteration","iteration":7,"currentError":0.00003198951951183662,"bestEigenvector":"[0.5144974703849097 0.8574918967357821]","bestEigenvalue":6.999971998992058}
+{"time":"2025-07-02T10:08:13.437004313-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.6014706309771656 6.002454938867677]"}
+{"time":"2025-07-02T10:08:13.43700803-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.000003999904003}
+{"time":"2025-07-02T10:08:13.437011787-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.000004571556236934824}
+{"time":"2025-07-02T10:08:13.437016386-03:00","level":"DEBUG","msg":"Iteration","iteration":8,"currentError":0.000004571556236934824,"bestEigenvector":"[0.5144955104335867 0.8574930727088605]","bestEigenvalue":7.000003999904003}
+{"time":"2025-07-02T10:08:13.43702387-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.601470238993755 6.002449843003376]"}
+{"time":"2025-07-02T10:08:13.437027456-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.999999428580246}
+{"time":"2025-07-02T10:08:13.437031203-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":6.530463042895686e-7}
+{"time":"2025-07-02T10:08:13.437041112-03:00","level":"DEBUG","msg":"The current error is less than epsilon, stopping the iterations","iterationError":6.530463042895686e-7,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:13.437048375-03:00","level":"INFO","msg":"Finished the inner regular power method","bestEigenvalue":6.999999428580246,"bestEigenvector":"[0.5144957904266603 0.857492904713063]","numIterations":8,"finalError":6.530463042895686e-7,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:13.43705612-03:00","level":"INFO","msg":"Finished the regular power method","bestEigenvalue":6.999999428580246,"bestEigenvector":"[0.5144957904266603 0.857492904713063]","numIterations":8,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:28.648474825-03:00","level":"DEBUG","msg":"Starting the Farthest power method","matrix":[[2,3],[5,4]],"initialGuess":[1,1],"epsilon":0.000001,"maxNumberOfIterations":100,"scalarToGoFarthest":0}
+{"time":"2025-07-02T10:08:28.64853085-03:00","level":"DEBUG","msg":"Creating matrix and scalar farthest matrix"}
+{"time":"2025-07-02T10:08:28.648536771-03:00","level":"DEBUG","msg":"Scalar farthest matrix created","scalarFarthestMatrix":[-0,0,0,-0]}
+{"time":"2025-07-02T10:08:28.648550917-03:00","level":"DEBUG","msg":"Matrix to find largest power result","matrixToFindLargestPowerResult":[2,3,5,4]}
+{"time":"2025-07-02T10:08:28.648555897-03:00","level":"DEBUG","msg":"Starting the inner regular power method","matrix":[2,3,5,4],"initialGuess":[1,1],"epsilon":0.000001,"maxNumberOfIterations":100}
+{"time":"2025-07-02T10:08:28.648561277-03:00","level":"DEBUG","msg":"Normalizing the initial guess vector"}
+{"time":"2025-07-02T10:08:28.648575854-03:00","level":"DEBUG","msg":"Iteration","iteration":1,"currentError":"!ERROR:json: unsupported value: +Inf","bestEigenvector":"[0.7071067811865475 0.7071067811865475]","bestEigenvalue":0}
+{"time":"2025-07-02T10:08:28.648593276-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.5355339059327373 6.363961030678928]"}
+{"time":"2025-07-02T10:08:28.648599498-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.999999999999998}
+{"time":"2025-07-02T10:08:28.648607092-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":1}
+{"time":"2025-07-02T10:08:28.648613013-03:00","level":"DEBUG","msg":"Iteration","iteration":2,"currentError":1,"bestEigenvector":"[0.4856429311786321 0.8741572761215378]","bestEigenvalue":6.999999999999998}
+{"time":"2025-07-02T10:08:28.64862189-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.5937576907218776 5.9248437603793125]"}
+{"time":"2025-07-02T10:08:28.648626328-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.924528301886794}
+{"time":"2025-07-02T10:08:28.648631298-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.010899182561307383}
+{"time":"2025-07-02T10:08:28.648639423-03:00","level":"DEBUG","msg":"Iteration","iteration":3,"currentError":0.010899182561307383,"bestEigenvector":"[0.5186123240269295 0.8550095071795325]","bestEigenvalue":6.924528301886794}
+{"time":"2025-07-02T10:08:28.648647588-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.6022531695924567 6.013099648852777]"}
+{"time":"2025-07-02T10:08:28.648652297-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.00943025540275}
+{"time":"2025-07-02T10:08:28.648657236-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.012112532748366309}
+{"time":"2025-07-02T10:08:28.648664449-03:00","level":"DEBUG","msg":"Iteration","iteration":4,"currentError":0.012112532748366309,"bestEigenvector":"[0.5139075049729083 0.8578456016862942]","bestEigenvalue":7.00943025540275}
+{"time":"2025-07-02T10:08:28.648672374-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.601351815004699 6.000919931609719]"}
+{"time":"2025-07-02T10:08:28.648690448-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.998624495181735}
+{"time":"2025-07-02T10:08:28.64869692-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.0015439834253793525}
+{"time":"2025-07-02T10:08:28.6487073-03:00","level":"DEBUG","msg":"Iteration","iteration":5,"currentError":0.0015439834253793525,"bestEigenvector":"[0.5145797879354744 0.8574425006076397]","bestEigenvalue":6.998624495181735}
+{"time":"2025-07-02T10:08:28.648717929-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.601487077693868 6.002668942107931]"}
+{"time":"2025-07-02T10:08:28.648726505-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.000195924732902}
+{"time":"2025-07-02T10:08:28.648732707-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00022448365275251216}
+{"time":"2025-07-02T10:08:28.648740241-03:00","level":"DEBUG","msg":"Iteration","iteration":6,"currentError":0.00022448365275251216,"bestEigenvector":"[0.5144837507162424 0.8575001284250326]","bestEigenvalue":7.000195924732902}
+{"time":"2025-07-02T10:08:28.648749178-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.6014678867075824 6.002419267281343]"}
+{"time":"2025-07-02T10:08:28.648754588-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.999971998992058}
+{"time":"2025-07-02T10:08:28.648759738-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00003198951951183662}
+{"time":"2025-07-02T10:08:28.648767592-03:00","level":"DEBUG","msg":"Iteration","iteration":7,"currentError":0.00003198951951183662,"bestEigenvector":"[0.5144974703849097 0.8574918967357821]","bestEigenvalue":6.999971998992058}
+{"time":"2025-07-02T10:08:28.648777942-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.6014706309771656 6.002454938867677]"}
+{"time":"2025-07-02T10:08:28.648783773-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.000003999904003}
+{"time":"2025-07-02T10:08:28.648790004-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.000004571556236934824}
+{"time":"2025-07-02T10:08:28.648797498-03:00","level":"DEBUG","msg":"Iteration","iteration":8,"currentError":0.000004571556236934824,"bestEigenvector":"[0.5144955104335867 0.8574930727088605]","bestEigenvalue":7.000003999904003}
+{"time":"2025-07-02T10:08:28.648812677-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[3.601470238993755 6.002449843003376]"}
+{"time":"2025-07-02T10:08:28.648819289-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":6.999999428580246}
+{"time":"2025-07-02T10:08:28.648824318-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":6.530463042895686e-7}
+{"time":"2025-07-02T10:08:28.64883037-03:00","level":"DEBUG","msg":"The current error is less than epsilon, stopping the iterations","iterationError":6.530463042895686e-7,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:28.648842152-03:00","level":"INFO","msg":"Finished the inner regular power method","bestEigenvalue":6.999999428580246,"bestEigenvector":"[0.5144957904266603 0.857492904713063]","numIterations":8,"finalError":6.530463042895686e-7,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:28.648855887-03:00","level":"DEBUG","msg":"Extracting eigenvector from matrix using eigenvalue decomposition","targetEigenvalue":6.999999428580246}
+{"time":"2025-07-02T10:08:28.648928663-03:00","level":"DEBUG","msg":"Found closest eigenvalue","foundEigenvalue":7,"targetEigenvalue":6.999999428580246,"difference":5.714197541806243e-7,"eigenvalueIndex":1}
+{"time":"2025-07-02T10:08:28.648939804-03:00","level":"DEBUG","msg":"Extracted eigenvector","eigenvector":[-0.5144957554275266,-0.8574929257125441]}
+{"time":"2025-07-02T10:08:28.64894833-03:00","level":"INFO","msg":"Finished the Farthest power method","farthestEigenvalue":6.999999428580246,"farthestEigenvector":"[-0.5144957554275266 -0.8574929257125441]","numIterations":8}
+{"time":"2025-07-02T10:08:34.271437437-03:00","level":"DEBUG","msg":"Starting the Farthest power method","matrix":[[2,3],[5,4]],"initialGuess":[1,1],"epsilon":0.000001,"maxNumberOfIterations":100,"scalarToGoFarthest":7}
+{"time":"2025-07-02T10:08:34.27148705-03:00","level":"DEBUG","msg":"Creating matrix and scalar farthest matrix"}
+{"time":"2025-07-02T10:08:34.27149793-03:00","level":"DEBUG","msg":"Scalar farthest matrix created","scalarFarthestMatrix":[-7,0,0,-7]}
+{"time":"2025-07-02T10:08:34.271508841-03:00","level":"DEBUG","msg":"Matrix to find largest power result","matrixToFindLargestPowerResult":[-5,3,5,-3]}
+{"time":"2025-07-02T10:08:34.2715191-03:00","level":"DEBUG","msg":"Starting the inner regular power method","matrix":[-5,3,5,-3],"initialGuess":[1,1],"epsilon":0.000001,"maxNumberOfIterations":100}
+{"time":"2025-07-02T10:08:34.271533988-03:00","level":"DEBUG","msg":"Normalizing the initial guess vector"}
+{"time":"2025-07-02T10:08:34.271553354-03:00","level":"DEBUG","msg":"Iteration","iteration":1,"currentError":"!ERROR:json: unsupported value: +Inf","bestEigenvector":"[0.7071067811865475 0.7071067811865475]","bestEigenvalue":0}
+{"time":"2025-07-02T10:08:34.271580264-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[-1.414213562373095 1.414213562373095]"}
+{"time":"2025-07-02T10:08:34.271596174-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":0}
+{"time":"2025-07-02T10:08:34.271609269-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":"!ERROR:json: unsupported value: NaN"}
+{"time":"2025-07-02T10:08:34.27162595-03:00","level":"DEBUG","msg":"Iteration","iteration":2,"currentError":"!ERROR:json: unsupported value: NaN","bestEigenvector":"[-0.7071067811865475 0.7071067811865475]","bestEigenvalue":0}
+{"time":"2025-07-02T10:08:34.271645046-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.65685424949238 -5.65685424949238]"}
+{"time":"2025-07-02T10:08:34.271661136-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":-7.999999999999998}
+{"time":"2025-07-02T10:08:34.271672457-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":1}
+{"time":"2025-07-02T10:08:34.271702453-03:00","level":"DEBUG","msg":"Iteration","iteration":3,"currentError":1,"bestEigenvector":"[0.7071067811865475 -0.7071067811865475]","bestEigenvalue":-7.999999999999998}
+{"time":"2025-07-02T10:08:34.271719905-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[-5.65685424949238 5.65685424949238]"}
+{"time":"2025-07-02T10:08:34.271730656-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":-7.999999999999998}
+{"time":"2025-07-02T10:08:34.27174349-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0}
+{"time":"2025-07-02T10:08:34.271756654-03:00","level":"DEBUG","msg":"The current error is less than epsilon, stopping the iterations","iterationError":0,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:34.271776652-03:00","level":"INFO","msg":"Finished the inner regular power method","bestEigenvalue":-7.999999999999998,"bestEigenvector":"[-0.7071067811865475 0.7071067811865475]","numIterations":3,"finalError":0,"epsilon":0.000001}
+{"time":"2025-07-02T10:08:34.271790798-03:00","level":"DEBUG","msg":"Extracting eigenvector from matrix using eigenvalue decomposition","targetEigenvalue":-0.9999999999999982}
+{"time":"2025-07-02T10:08:34.271833989-03:00","level":"DEBUG","msg":"Found closest eigenvalue","foundEigenvalue":-1,"targetEigenvalue":-0.9999999999999982,"difference":1.7763568394002505e-15,"eigenvalueIndex":0}
+{"time":"2025-07-02T10:08:34.271852634-03:00","level":"DEBUG","msg":"Extracted eigenvector","eigenvector":[-0.7071067811865475,0.7071067811865475]}
+{"time":"2025-07-02T10:08:34.271870908-03:00","level":"INFO","msg":"Finished the Farthest power method","farthestEigenvalue":-0.9999999999999982,"farthestEigenvector":"[-0.7071067811865475 0.7071067811865475]","numIterations":3}
+{"time":"2025-07-02T10:15:12.453287837-03:00","level":"DEBUG","msg":"Starting the regular power method","matrix":[[6,1,2,0,0],[1,5,1,1,0],[2,1,4,1,1],[0,1,1,3,1],[0,0,1,1,2]],"initialGuess":[1,1,1,1,1],"epsilon":0.000001,"maxNumberOfIterations":100}
+{"time":"2025-07-02T10:15:12.453428971-03:00","level":"DEBUG","msg":"Starting the inner regular power method","matrix":[6,1,2,0,0,1,5,1,1,0,2,1,4,1,1,0,1,1,3,1,0,0,1,1,2],"initialGuess":[1,1,1,1,1],"epsilon":0.000001,"maxNumberOfIterations":100}
+{"time":"2025-07-02T10:15:12.453441895-03:00","level":"DEBUG","msg":"Normalizing the initial guess vector"}
+{"time":"2025-07-02T10:15:12.453473625-03:00","level":"DEBUG","msg":"Iteration","iteration":1,"currentError":"!ERROR:json: unsupported value: +Inf","bestEigenvector":"[0.4472135954999579 0.4472135954999579 0.4472135954999579 0.4472135954999579 0.4472135954999579]","bestEigenvalue":0}
+{"time":"2025-07-02T10:15:12.453505945-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[4.024922359499621 3.5777087639996634 4.024922359499621 2.6832815729997477 1.7888543819998317]"}
+{"time":"2025-07-02T10:15:12.453515543-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.199999999999999}
+{"time":"2025-07-02T10:15:12.453523157-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":1}
+{"time":"2025-07-02T10:15:12.453531853-03:00","level":"DEBUG","msg":"Iteration","iteration":2,"currentError":1,"bestEigenvector":"[0.5397841295136604 0.47980811512325366 0.5397841295136604 0.35985608634244026 0.23990405756162683]","bestEigenvalue":7.199999999999999}
+{"time":"2025-07-02T10:15:12.453542093-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[4.7980811512325365 3.838464920986029 4.318273036109283 2.3390645612258614 1.3794483309793544]"}
+{"time":"2025-07-02T10:15:12.453548675-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":7.93525179856115}
+{"time":"2025-07-02T10:15:12.453556019-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.09265639165911145}
+{"time":"2025-07-02T10:15:12.453564314-03:00","level":"DEBUG","msg":"Iteration","iteration":3,"currentError":0.09265639165911145,"bestEigenvector":"[0.6008078787457772 0.48064630299662175 0.5407270908711995 0.2928938408885664 0.17273226513941098]","bestEigenvalue":7.93525179856115}
+{"time":"2025-07-02T10:15:12.453573121-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.166947757213684 3.8376603254886525 4.310796530000951 2.0727871816729317 1.179085462038588]"}
+{"time":"2025-07-02T10:15:12.453579442-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.09063733784546}
+{"time":"2025-07-02T10:15:12.453585554-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.019205599360814854}
+{"time":"2025-07-02T10:15:12.453593799-03:00","level":"DEBUG","msg":"Iteration","iteration":4,"currentError":0.019205599360814854,"bestEigenvector":"[0.6374837163311761 0.47347991140295204 0.5318541470553707 0.25573474666773927 0.14547230154650387]","bestEigenvalue":8.09063733784546}
+{"time":"2025-07-02T10:15:12.453603237-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.36209050350075 3.792472167069046 4.27707098050103 1.9180106000080441 1.0785334968161178]"}
+{"time":"2025-07-02T10:15:12.45361052-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.136081410343367}
+{"time":"2025-07-02T10:15:12.453618085-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.005585498743920516}
+{"time":"2025-07-02T10:15:12.453627723-03:00","level":"DEBUG","msg":"Iteration","iteration":5,"currentError":0.005585498743920516,"bestEigenvector":"[0.6586808169990567 0.46586842646917903 0.525396691077872 0.23560900141490362 0.1324873805057719]","bestEigenvalue":8.136081410343367}
+{"time":"2025-07-02T10:15:12.453637481-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.468746710619262 3.7490286418377274 4.252913206699456 1.830579502297534 1.0259804535043195]"}
+{"time":"2025-07-02T10:15:12.453654012-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.150409622995525}
+{"time":"2025-07-02T10:15:12.453659612-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.0017579745454427778}
+{"time":"2025-07-02T10:15:12.453666345-03:00","level":"DEBUG","msg":"Iteration","iteration":6,"currentError":0.0017579745454427778,"bestEigenvector":"[0.6708561738007884 0.4598967813318287 0.5217087629626505 0.2245588661776611 0.12585796304952043]","bestEigenvalue":8.150409622995525}
+{"time":"2025-07-02T10:15:12.45367433-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.52845135006186 3.7166077096002437 4.238861010011189 1.781140105876983 0.9979835552393524]"}
+{"time":"2025-07-02T10:15:12.453679099-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.1550775568667}
+{"time":"2025-07-02T10:15:12.453684148-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.0005723960120091079}
+{"time":"2025-07-02T10:15:12.45369048-03:00","level":"DEBUG","msg":"Iteration","iteration":7,"currentError":0.0005723960120091079,"bestEigenvector":"[0.6778743101927126 0.4557140377791318 0.5197504330271384 0.21839554048249424 0.1223683399301284]","bestEigenvalue":8.1550775568667}
+{"time":"2025-07-02T10:15:12.453697764-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.562460764989684 3.694590472598004 4.231228270685733 1.7530194321838812 0.9828826533698894]"}
+{"time":"2025-07-02T10:15:12.453702252-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.156634067182043}
+{"time":"2025-07-02T10:15:12.453707321-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00019082752793892426}
+{"time":"2025-07-02T10:15:12.453713763-03:00","level":"DEBUG","msg":"Iteration","iteration":8,"currentError":0.00019082752793892426,"bestEigenvector":"[0.681941488109837 0.45294603077430995 0.5187362617647502 0.2149150763980543 0.12049855047879167]","bestEigenvalue":8.156634067182043}
+{"time":"2025-07-02T10:15:12.453722119-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.582067482962833 3.680322980144191 4.227187680929831 1.7369260722120146 0.9746484391203878]"}
+{"time":"2025-07-02T10:15:12.453727239-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.157161950916183}
+{"time":"2025-07-02T10:15:12.453733019-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00006471414167285759}
+{"time":"2025-07-02T10:15:12.453739662-03:00","level":"DEBUG","msg":"Iteration","iteration":9,"currentError":0.00006471414167285759,"bestEigenvector":"[0.6843101150179484 0.4511737361707633 0.5182143170014428 0.21293115568395057 0.11948293128167782]","bestEigenvalue":8.157161950916183}
+{"time":"2025-07-02T10:15:12.453747527-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.593463060281339 3.671324268557158 4.22506532117806 1.7276644515057356 0.970111335248749]"}
+{"time":"2025-07-02T10:15:12.453752346-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.157343111068165}
+{"time":"2025-07-02T10:15:12.453757104-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.000022208229997838474}
+{"time":"2025-07-02T10:15:12.453761863-03:00","level":"DEBUG","msg":"Iteration","iteration":10,"currentError":0.000022208229997838474,"bestEigenvector":"[0.6856950190541978 0.4500626422579466 0.5179450037817364 0.21179203227542193 0.11892462743369332]","bestEigenvalue":8.157343111068165}
+{"time":"2025-07-02T10:15:12.453767484-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.600122764146606 3.665745266401089 4.223949355202403 1.722308370299642 0.967586290924545]"}
+{"time":"2025-07-02T10:15:12.453774006-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.157405779771443}
+{"time":"2025-07-02T10:15:12.453777282-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.00000768243053849653}
+{"time":"2025-07-02T10:15:12.45378166-03:00","level":"DEBUG","msg":"Iteration","iteration":11,"currentError":0.00000768243053849653,"bestEigenvector":"[0.6865072317851311 0.44937597643003707 0.5178050377048266 0.21113414854842888 0.11861436151874727]","bestEigenvalue":8.157405779771443}
+{"time":"2025-07-02T10:15:12.45378668-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.604029442550476 3.662326300188572 4.223359100886782 1.7191978212988976 0.96616790929075]"}
+{"time":"2025-07-02T10:15:12.453789775-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.157427572942728}
+{"time":"2025-07-02T10:15:12.453793222-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":0.0000026715739846287395}
+{"time":"2025-07-02T10:15:12.45379755-03:00","level":"DEBUG","msg":"Iteration","iteration":12,"currentError":0.0000026715739846287395,"bestEigenvector":"[0.6869846836861292 0.4489558987301442 0.5177315797069009 0.2107523851483169 0.11844023347059998]","bestEigenvalue":8.157427572942728}
+{"time":"2025-07-02T10:15:12.45380295-03:00","level":"DEBUG","msg":"Multiplying matrix A with the calculated Y eigenvector","Y":"[5.6063271602607205 3.660248142192068 4.223044203548923 1.717384867352596 0.9653644317964176]"}
+{"time":"2025-07-02T10:15:12.453805876-03:00","level":"DEBUG","msg":"Largest absolute element in Y","largestElement":8.157435177459668}
+{"time":"2025-07-02T10:15:12.453809172-03:00","level":"DEBUG","msg":"Calculated iteration error","iterationError":9.322191073880892e-7}
+{"time":"2025-07-02T10:15:12.453813189-03:00","level":"DEBUG","msg":"The current error is less than epsilon, stopping the iterations","iterationError":9.322191073880892e-7,"epsilon":0.000001}
+{"time":"2025-07-02T10:15:12.45381916-03:00","level":"INFO","msg":"Finished the inner regular power method","bestEigenvalue":8.157435177459668,"bestEigenvector":"[0.6872658457154226 0.4487008094716596 0.5176925932218859 0.2105299832743013 0.1183416492967027]","numIterations":12,"finalError":9.322191073880892e-7,"epsilon":0.000001}
+{"time":"2025-07-02T10:15:12.453825793-03:00","level":"INFO","msg":"Finished the regular power method","bestEigenvalue":8.157435177459668,"bestEigenvector":"[0.6872658457154226 0.4487008094716596 0.5176925932218859 0.2105299832743013 0.1183416492967027]","numIterations":12,"epsilon":0.000001}
