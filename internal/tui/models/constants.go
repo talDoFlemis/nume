@@ -65,3 +65,38 @@ const (
 	DerivativeOrderSecond = 2
 	DerivativeOrderThird  = 3
 )
+
+// Eigen section indices
+const (
+	EigenSectionPowerMethodSelection = 0
+	EigenSectionMatrixSelection      = 1
+	EigenSectionArguments            = 2
+	EigenSectionCalculate            = 3
+)
+
+// Power method indices
+const (
+	PowerMethodRegular  = 0
+	PowerMethodInverse  = 1
+	PowerMethodFarthest = 2
+	PowerMethodNearest  = 3
+)
+
+// Matrix selection indices
+const (
+	Matrix2x2Simple = 0
+	Matrix3x3Simple = 1
+	Matrix3x3Complex = 2
+	Matrix4x4Simple = 3
+)
+
+// Default eigen values
+const (
+	DefaultEpsilon      = 1e-6
+	DefaultMaxIterations = 100
+)
+
+// Eigen section count
+const (
+	EigenSectionCount = 4
+)
