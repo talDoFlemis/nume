@@ -13,16 +13,16 @@ type Tab int
 const (
 	DerivativeTab Tab = 0
 	IntegralTab   Tab = 1
+	EigenTab      Tab = 2
 )
 
 type MainModel struct {
-	tabs            []string
-	activeTab       Tab
-	derivativeModel *DerivativeModel
-	integralModel   *IntegralModel
-	size            *tea.WindowSizeMsg
-	keys            help.KeyMap
-	help            help.Model
+	tabs      []string
+	activeTab Tab
+	models    map[Tab]NumeModel
+	size      *tea.WindowSizeMsg
+	keys      help.KeyMap
+	help      help.Model
 	*Theme
 }
 
@@ -30,15 +30,26 @@ type NumeTabContent interface {
 	GetHelpKeys() help.KeyMap
 }
 
+type NumeModel interface {
+	tea.Model
+	NumeTabContent
+}
+
 func NewMainModel(theme *Theme) MainModel {
 	derivateModel := NewDerivativeModel(theme)
 	integralModel := NewIntegralModel()
+	eigenModel := NewEigenModel(theme)
+
+	models := make(map[Tab]NumeModel)
+
+	models[DerivativeTab] = derivateModel
+	models[IntegralTab] = integralModel
+	models[EigenTab] = eigenModel
 
 	return MainModel{
-		tabs:            []string{"d Derivatives", "i Integrals"},
-		activeTab:       DerivativeTab,
-		derivativeModel: derivateModel,
-		integralModel:   integralModel,
+		tabs:      []string{"d Derivatives", "i Integrals", "e Eigen"},
+		activeTab: DerivativeTab,
+		models:    models,
 		size: &tea.WindowSizeMsg{
 			Width:  0,
 			Height: 0,
@@ -50,7 +61,7 @@ func NewMainModel(theme *Theme) MainModel {
 }
 
 func (m MainModel) Init() tea.Cmd {
-	return m.derivativeModel.Init()
+	return m.models[m.activeTab].Init()
 }
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -62,24 +73,19 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Pass window size to child models
 		var cmds []tea.Cmd
-		if m.derivativeModel != nil {
+
+		for modelTab, model := range m.models {
 			var newModel tea.Model
 			var cmd tea.Cmd
-			newModel, cmd = m.derivativeModel.Update(msg)
-			if derivModel, ok := newModel.(*DerivativeModel); ok {
-				m.derivativeModel = derivModel
+			newModel, cmd = model.Update(msg)
+
+			if sameModel, ok := newModel.(NumeModel); ok {
+				m.models[modelTab] = sameModel
 			}
+
 			cmds = append(cmds, cmd)
 		}
-		if m.integralModel != nil {
-			var newModel tea.Model
-			var cmd tea.Cmd
-			newModel, cmd = m.integralModel.Update(msg)
-			if intModel, ok := newModel.(*IntegralModel); ok {
-				m.integralModel = intModel
-			}
-			cmds = append(cmds, cmd)
-		}
+
 		return m, tea.Batch(cmds...)
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -91,33 +97,32 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "d":
 			if m.activeTab != DerivativeTab {
 				m.activeTab = DerivativeTab
-				m.keys = m.derivativeModel.GetHelpKeys()
 			}
 			return m, nil
 		case "i":
 			if m.activeTab != IntegralTab {
 				m.activeTab = IntegralTab
-				m.keys = m.integralModel.GetHelpKeys()
+			}
+			return m, nil
+		case "e":
+			if m.activeTab != EigenTab {
+				m.activeTab = EigenTab
 			}
 			return m, nil
 		}
+		m.keys = m.models[m.activeTab].GetHelpKeys()
 	}
 
 	// Delegate to active tab's model
 	var cmd tea.Cmd
-	switch m.activeTab {
-	case DerivativeTab:
-		var newModel tea.Model
-		newModel, cmd = m.derivativeModel.Update(msg)
-		if derivModel, ok := newModel.(*DerivativeModel); ok {
-			m.derivativeModel = derivModel
-		}
-	case IntegralTab:
-		var newModel tea.Model
-		newModel, cmd = m.integralModel.Update(msg)
-		if intModel, ok := newModel.(*IntegralModel); ok {
-			m.integralModel = intModel
-		}
+
+	model := m.models[m.activeTab]
+
+	var newModel tea.Model
+	newModel, cmd = model.Update(msg)
+
+	if sameModel, ok := newModel.(NumeModel); ok {
+		m.models[m.activeTab] = sameModel
 	}
 
 	return m, cmd
@@ -175,12 +180,7 @@ func (m MainModel) View() string {
 		Render(helpView)
 
 	// Content area
-	var content string
-	if m.activeTab == DerivativeTab {
-		content = m.derivativeModel.View()
-	} else {
-		content = m.integralModel.View()
-	}
+	content := m.models[m.activeTab].View()
 
 	// Layout
 	flexBox := lipgloss.JoinVertical(
