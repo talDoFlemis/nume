@@ -185,10 +185,10 @@ func NewEigenModel(theme *Theme) *EigenModel {
 		{{2.0, 3.0}, {5.0, 4.0}},
 		// 3x3 Simple
 		{{2.0, 1.0, 0.0}, {1.0, 2.0, 1.0}, {0.0, 1.0, 2.0}},
-		// 3x3 Complex
-		{{5.0, 2.0, 1.0}, {2.0, 3.0, 1.0}, {1.0, 1.0, 2.0}},
 		// 4x4 Simple
 		{{4.0, 1.0, 0.0, 0.0}, {1.0, 3.0, 1.0, 0.0}, {0.0, 1.0, 3.0, 1.0}, {0.0, 0.0, 1.0, 2.0}},
+		// 5x5 Real
+		{{6.0, 1.0, 2.0, 0.0, 0.0}, {1.0, 5.0, 1.0, 1.0, 0.0}, {2.0, 1.0, 4.0, 1.0, 1.0}, {0.0, 1.0, 1.0, 3.0, 1.0}, {0.0, 0.0, 1.0, 1.0, 2.0}},
 	}
 
 	return &EigenModel{
@@ -203,8 +203,8 @@ func NewEigenModel(theme *Theme) *EigenModel {
 		matrixOptions: []string{
 			"2x2 Simple Matrix",
 			"3x3 Simple Matrix",
-			"3x3 Complex Matrix",
 			"4x4 Simple Matrix",
+			"5x5 Real Matrix",
 		},
 		selectedMatrix:     0,
 		predefinedMatrices: predefinedMatrices,
@@ -536,8 +536,8 @@ Choose a predefined matrix for eigenvalue calculation:
 
 - **2x2 Simple**: Small symmetric matrix
 - **3x3 Simple**: Tridiagonal symmetric matrix
-- **3x3 Complex**: General 3x3 matrix
 - **4x4 Simple**: Larger tridiagonal matrix
+- **5x5 Real**: Large pentadiagonal matrix
 
 Use ↑/↓ arrows to select a matrix.
 
