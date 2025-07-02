@@ -97,20 +97,22 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "d":
 			if m.activeTab != DerivativeTab {
 				m.activeTab = DerivativeTab
+				m.keys = m.models[m.activeTab].GetHelpKeys()
 			}
 			return m, nil
 		case "i":
 			if m.activeTab != IntegralTab {
 				m.activeTab = IntegralTab
+				m.keys = m.models[m.activeTab].GetHelpKeys()
 			}
 			return m, nil
 		case "e":
 			if m.activeTab != EigenTab {
 				m.activeTab = EigenTab
+				m.keys = m.models[m.activeTab].GetHelpKeys()
 			}
 			return m, nil
 		}
-		m.keys = m.models[m.activeTab].GetHelpKeys()
 	}
 
 	// Delegate to active tab's model
