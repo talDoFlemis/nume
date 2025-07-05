@@ -9,7 +9,8 @@ import (
 	"github.com/taldoflemis/nume/internal/expressions"
 )
 
-type closedFormulasTestCase struct {
+type formulasTestCase struct {
+	name          string
 	leftInterval  float64
 	rightInterval float64
 	expectedValue float64
@@ -22,8 +23,9 @@ func TestTrapezoidalRule(t *testing.T) {
 	// Arrange
 	t.Parallel()
 
-	testCases := []closedFormulasTestCase{
+	testCases := []formulasTestCase{
 		{
+			name:          "sin(x)",
 			leftInterval:  0,
 			rightInterval: math.Pi / 2,
 			expectedValue: 1,
@@ -33,6 +35,7 @@ func TestTrapezoidalRule(t *testing.T) {
 			},
 		},
 		{
+			name:          "sin(x)",
 			leftInterval:  0,
 			rightInterval: math.Pi * 2,
 			expectedValue: 0,
@@ -46,8 +49,8 @@ func TestTrapezoidalRule(t *testing.T) {
 	strategy := &TrapezoidalRule{}
 
 	for _, testCase := range testCases {
-		testName := fmt.Sprintf("TrapezoidalRule from %.2f to %.2f",
-			testCase.leftInterval, testCase.rightInterval)
+		testName := fmt.Sprintf("TrapezoidalRule - %s from %.2f to %.2f",
+			testCase.name, testCase.leftInterval, testCase.rightInterval)
 		t.Run(testName, func(t *testing.T) {
 			// Act
 			partitionArea, err := strategy.Integrate(
@@ -74,8 +77,9 @@ func TestClosedFormulas(t *testing.T) {
 		&SimpsonsThreeEighthsRule{},
 	}
 
-	testCases := []closedFormulasTestCase{
+	testCases := []formulasTestCase{
 		{
+			name:          "sin(x)",
 			leftInterval:  0,
 			rightInterval: math.Pi / 2,
 			expectedValue: 1,
@@ -85,6 +89,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "sin(x)",
 			leftInterval:  0,
 			rightInterval: math.Pi * 2,
 			expectedValue: 0,
@@ -94,6 +99,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "x",
 			leftInterval:  0,
 			rightInterval: 1,
 			expectedValue: 0.5,
@@ -104,6 +110,7 @@ func TestClosedFormulas(t *testing.T) {
 		},
 		// New test cases without expected values
 		{
+			name:          "x²",
 			leftInterval:  0,
 			rightInterval: 1,
 			expectedValue: 1 / 3.0,
@@ -113,6 +120,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "x³",
 			leftInterval:  1,
 			rightInterval: 2,
 			expectedValue: 15 / 4.0,
@@ -122,6 +130,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "e^x",
 			leftInterval:  0,
 			rightInterval: 1,
 			expectedValue: math.E - 1, // e^x - 1
@@ -131,6 +140,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "1/x",
 			leftInterval:  1,
 			rightInterval: 2,
 			expectedValue: math.Log(2), // ln(x)
@@ -140,6 +150,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "cos(x)",
 			leftInterval:  0,
 			rightInterval: math.Pi / 4,
 			expectedValue: 1 / (math.Sqrt(2)), // 1/sqrt(2)
@@ -149,6 +160,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "√x",
 			leftInterval:  0,
 			rightInterval: 2,
 			expectedValue: 4 * math.Sqrt(2) / 3.0,
@@ -158,6 +170,7 @@ func TestClosedFormulas(t *testing.T) {
 			},
 		},
 		{
+			name:          "x³ + 2x² - x + 1",
 			leftInterval:  -1,
 			rightInterval: 1,
 			expectedValue: 10 / 3.0,
@@ -170,8 +183,9 @@ func TestClosedFormulas(t *testing.T) {
 
 	for _, testCase := range testCases {
 		for _, strategy := range closedFormulas {
-			testName := fmt.Sprintf("%s from %.2f to %.2f",
-				strategy.Description(), testCase.leftInterval, testCase.rightInterval)
+			testName := fmt.Sprintf("%s - %s from %.2f to %.2f",
+				strategy.Description(), testCase.name,
+				testCase.leftInterval, testCase.rightInterval)
 			t.Run(testName, func(t *testing.T) {
 				partitionArea, err := strategy.Integrate(
 					t.Context(),
