@@ -73,60 +73,7 @@ func (g *GaussLegendre) Integrate(
 	leftInterval,
 	rightInterval float64,
 ) (float64, error) {
-	nodes := g.nodes[g.order]
-	weights := g.weights[g.order]
-
-	slog.DebugContext(ctx, "Calculating Gauss-Legendre quadrature",
-		slog.Any("expression", expr),
-		slog.Float64("leftInterval", leftInterval),
-		slog.Float64("rightInterval", rightInterval),
-		slog.Int("order", g.order),
-		slog.Any("nodes", nodes),
-		slog.Any("weights", weights),
-	)
-
-	if leftInterval == math.Inf(-1) {
-		slog.ErrorContext(ctx, "Left interval is infinite, cannot perform Gauss-Legendre quadrature. Use another quadrature method.")
-		return 0, ErrInfiniteLeftInterval
-	}
-
-	if rightInterval == math.Inf(1) {
-		slog.ErrorContext(ctx, "Right interval is infinite, cannot perform Gauss-Legendre quadrature. Use another quadrature method.")
-		return 0, ErrInfiniteRightInterval
-	}
-
-	if leftInterval == rightInterval {
-		panic("Left and right intervals are equal, cannot perform Gauss-Legendre quadrature")
-	}
-
-	scaleFactor := (rightInterval - leftInterval) / 2.0
-	offset := (rightInterval + leftInterval) / 2.0
-
-	slog.DebugContext(ctx, "Scale factor and offset calculated",
-		slog.Float64("scaleFactor", scaleFactor),
-		slog.Float64("offset", offset),
-	)
-
-	accumulatedArea := 0.0
-
-	for i := range nodes {
-		slog.DebugContext(ctx, "Processing node",
-			slog.Float64("node", nodes[i]),
-			slog.Float64("weight", weights[i]),
-			slog.Float64("accumulatedArea", accumulatedArea),
-		)
-
-		transformedX := scaleFactor*nodes[i] + offset
-		accumulatedArea += weights[i] * expr(transformedX)
-	}
-
-	accumulatedArea = accumulatedArea * scaleFactor
-
-	slog.InfoContext(ctx, "Final accumulated area",
-		slog.Float64("accumulatedArea", accumulatedArea),
-	)
-
-	return accumulatedArea, nil
+	return calculatePartition(ctx, g, expr, leftInterval, rightInterval)
 }
 
 // Describe implements GaussianQuadrature.
@@ -137,4 +84,51 @@ func (g *GaussLegendre) Describe() string {
 // Order implements GaussianQuadrature.
 func (g *GaussLegendre) Order() int {
 	return g.order
+}
+
+// Validate implements GaussianQuadrature.
+func (g *GaussLegendre) Validate(ctx context.Context, leftInterval, rightInterval float64) error {
+	if leftInterval == math.Inf(-1) {
+		slog.ErrorContext(ctx, "Left interval is infinite, cannot perform Gauss-Legendre quadrature. Use another quadrature method.")
+		return ErrInfiniteLeftInterval
+	}
+
+	if rightInterval == math.Inf(1) {
+		slog.ErrorContext(ctx, "Right interval is infinite, cannot perform Gauss-Legendre quadrature. Use another quadrature method.")
+		return ErrInfiniteRightInterval
+	}
+
+	if leftInterval == rightInterval {
+		return ErrZeroWidthInterval
+	}
+
+	return nil
+}
+
+// GetNodes implements GaussianQuadrature.
+func (g *GaussLegendre) GetNodes() []float64 {
+	return g.nodes[g.order]
+}
+
+// GetWeights implements GaussianQuadrature.
+func (g *GaussLegendre) GetWeights() []float64 {
+	return g.weights[g.order]
+}
+
+// GetOffset implements GaussianQuadrature.
+func (g *GaussLegendre) GetOffset(leftInterval, rightInterval float64) float64 {
+	// Gauss-Legendre quadrature uses dynamic offset calculation
+	return (rightInterval + leftInterval) / 2.0
+}
+
+// GetScalingFactor implements GaussianQuadrature.
+func (g *GaussLegendre) GetScalingFactor(leftInterval, rightInterval float64) float64 {
+	// Gauss-Legendre quadrature uses dynamic scaling factor calculation
+	return (rightInterval - leftInterval) / 2.0
+}
+
+// AllowPartitioning implements GaussianQuadrature.
+func (g *GaussLegendre) AllowPartitioning() bool {
+	// Gauss-Legendre quadrature supports partitioning for arbitrary intervals
+	return true
 }

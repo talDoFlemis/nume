@@ -88,44 +88,48 @@ func (g *GaussLaguerre) Integrate(
 	leftInterval,
 	rightInterval float64,
 ) (float64, error) {
-	nodes := g.nodes[g.order]
-	weights := g.weights[g.order]
-
-	slog.DebugContext(ctx, "Calculating quadrature",
-		slog.String("method", g.Describe()),
-		slog.Any("expression", expr),
-		slog.Float64("leftInterval", leftInterval),
-		slog.Float64("rightInterval", rightInterval),
-		slog.Int("order", g.order),
-		slog.Any("nodes", nodes),
-		slog.Any("weights", weights),
-	)
-
-	if leftInterval != 0.0 || rightInterval != math.Inf(1) {
-		slog.ErrorContext(ctx, "Left interval must be 0 and right interval must be +∞, "+
-			"cannot perform Gauss-Laguerre quadrature. Use another quadrature method.")
-		return 0, ErrLaguerreIntervalsMustBePositiveInfinite
-	}
-
-	accumulatedArea := 0.0
-
-	for i := range nodes {
-		slog.DebugContext(ctx, "Processing node",
-			slog.Float64("node", nodes[i]),
-			slog.Float64("weight", weights[i]),
-			slog.Float64("accumulatedArea", accumulatedArea),
-		)
-		accumulatedArea += weights[i] * expr(nodes[i])
-	}
-
-	slog.InfoContext(ctx, "Final accumulated area",
-		slog.Float64("accumulatedArea", accumulatedArea),
-	)
-
-	return accumulatedArea, nil
+	return calculatePartition(ctx, g, expr, leftInterval, rightInterval)
 }
 
 // Order implements GaussianQuadrature.
 func (g *GaussLaguerre) Order() int {
 	return g.order
+}
+
+// Validate implements GaussianQuadrature.
+func (g *GaussLaguerre) Validate(ctx context.Context, leftInterval, rightInterval float64) error {
+	if leftInterval != 0.0 || rightInterval != math.Inf(1) {
+		slog.ErrorContext(ctx, "Left interval must be 0 and right interval must be +∞, "+
+			"cannot perform Gauss-Laguerre quadrature. Use another quadrature method.")
+		return ErrLaguerreIntervalsMustBePositiveInfinite
+	}
+	return nil
+}
+
+// GetNodes implements GaussianQuadrature.
+func (g *GaussLaguerre) GetNodes() []float64 {
+	return g.nodes[g.order]
+}
+
+// GetWeights implements GaussianQuadrature.
+func (g *GaussLaguerre) GetWeights() []float64 {
+	return g.weights[g.order]
+}
+
+// GetOffset implements GaussianQuadrature.
+func (g *GaussLaguerre) GetOffset(leftInterval, rightInterval float64) float64 {
+	// Gauss-Laguerre quadrature doesn't need offset transformation
+	return 0.0
+}
+
+// GetScalingFactor implements GaussianQuadrature.
+func (g *GaussLaguerre) GetScalingFactor(leftInterval, rightInterval float64) float64 {
+	// Gauss-Laguerre quadrature doesn't need scaling transformation
+	return 1.0
+}
+
+// AllowPartitioning implements GaussianQuadrature.
+func (g *GaussLaguerre) AllowPartitioning() bool {
+	// Gauss-Laguerre quadrature is for [0, +∞) interval and doesn't support partitioning
+	return false
 }

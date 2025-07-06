@@ -84,43 +84,47 @@ func (g *GaussHermite) Integrate(
 	leftInterval,
 	rightInterval float64,
 ) (float64, error) {
-	nodes := g.nodes[g.order]
-	weights := g.weights[g.order]
-
-	slog.DebugContext(ctx, "Calculating quadrature",
-		slog.String("method", g.Describe()),
-		slog.Any("expression", expr),
-		slog.Float64("leftInterval", leftInterval),
-		slog.Float64("rightInterval", rightInterval),
-		slog.Int("order", g.order),
-		slog.Any("nodes", nodes),
-		slog.Any("weights", weights),
-	)
-
-	if leftInterval != math.Inf(-1) || rightInterval != math.Inf(1) {
-		slog.ErrorContext(ctx, "Left and right intervals must be infinite, cannot perform Gauss-Hermite quadrature. Use another quadrature method.")
-		return 0, ErrHermiteIntervalsMustBeInfinite
-	}
-
-	accumulatedArea := 0.0
-
-	for i := range nodes {
-		slog.DebugContext(ctx, "Processing node",
-			slog.Float64("node", nodes[i]),
-			slog.Float64("weight", weights[i]),
-			slog.Float64("accumulatedArea", accumulatedArea),
-		)
-		accumulatedArea += weights[i] * expr(nodes[i])
-	}
-
-	slog.InfoContext(ctx, "Final accumulated area",
-		slog.Float64("accumulatedArea", accumulatedArea),
-	)
-
-	return accumulatedArea, nil
+	return calculatePartition(ctx, g, expr, leftInterval, rightInterval)
 }
 
 // Order implements GaussianQuadrature.
 func (g *GaussHermite) Order() int {
 	return g.order
+}
+
+// Validate implements GaussianQuadrature.
+func (g *GaussHermite) Validate(ctx context.Context, leftInterval, rightInterval float64) error {
+	if leftInterval != math.Inf(-1) || rightInterval != math.Inf(1) {
+		slog.ErrorContext(ctx, "Left and right intervals must be infinite, cannot perform Gauss-Hermite quadrature. Use another quadrature method.")
+		return ErrHermiteIntervalsMustBeInfinite
+	}
+	return nil
+}
+
+// GetNodes implements GaussianQuadrature.
+func (g *GaussHermite) GetNodes() []float64 {
+	return g.nodes[g.order]
+}
+
+// GetWeights implements GaussianQuadrature.
+func (g *GaussHermite) GetWeights() []float64 {
+	return g.weights[g.order]
+}
+
+// GetOffset implements GaussianQuadrature.
+func (g *GaussHermite) GetOffset(leftInterval, rightInterval float64) float64 {
+	// Gauss-Hermite quadrature doesn't need offset transformation
+	return 0.0
+}
+
+// GetScalingFactor implements GaussianQuadrature.
+func (g *GaussHermite) GetScalingFactor(leftInterval, rightInterval float64) float64 {
+	// Gauss-Hermite quadrature doesn't need scaling transformation
+	return 1.0
+}
+
+// AllowPartitioning implements GaussianQuadrature.
+func (g *GaussHermite) AllowPartitioning() bool {
+	// Gauss-Hermite quadrature is for (-∞, +∞) interval and doesn't support partitioning
+	return false
 }

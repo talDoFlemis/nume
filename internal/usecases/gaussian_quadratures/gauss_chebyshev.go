@@ -90,44 +90,48 @@ func (g *GaussChebyshev) Integrate(
 	leftInterval,
 	rightInterval float64,
 ) (float64, error) {
-	nodes := g.nodes[g.order]
-	weights := g.weights[g.order]
-
-	slog.DebugContext(ctx, "Calculating quadrature",
-		slog.String("method", g.Describe()),
-		slog.Any("expression", expr),
-		slog.Float64("leftInterval", leftInterval),
-		slog.Float64("rightInterval", rightInterval),
-		slog.Int("order", g.order),
-		slog.Any("nodes", nodes),
-		slog.Any("weights", weights),
-	)
-
-	if leftInterval != -1.0 || rightInterval != 1.0 {
-		slog.ErrorContext(ctx, "Left interval must be -1 and right interval must be 1, "+
-			"cannot perform Gauss-Chebyshev quadrature. Use another quadrature method.")
-		return 0, ErrChebyshevIntervalsMustBeMinusOneToOne
-	}
-
-	accumulatedArea := 0.0
-
-	for i := range nodes {
-		slog.DebugContext(ctx, "Processing node",
-			slog.Float64("node", nodes[i]),
-			slog.Float64("weight", weights[i]),
-			slog.Float64("accumulatedArea", accumulatedArea),
-		)
-		accumulatedArea += weights[i] * expr(nodes[i])
-	}
-
-	slog.InfoContext(ctx, "Final accumulated area",
-		slog.Float64("accumulatedArea", accumulatedArea),
-	)
-
-	return accumulatedArea, nil
+	return calculatePartition(ctx, g, expr, leftInterval, rightInterval)
 }
 
 // Order implements GaussianQuadrature.
 func (g *GaussChebyshev) Order() int {
 	return g.order
+}
+
+// Validate implements GaussianQuadrature.
+func (g *GaussChebyshev) Validate(ctx context.Context, leftInterval, rightInterval float64) error {
+	if leftInterval != -1.0 || rightInterval != 1.0 {
+		slog.ErrorContext(ctx, "Left interval must be -1 and right interval must be 1, "+
+			"cannot perform Gauss-Chebyshev quadrature. Use another quadrature method.")
+		return ErrChebyshevIntervalsMustBeMinusOneToOne
+	}
+	return nil
+}
+
+// GetNodes implements GaussianQuadrature.
+func (g *GaussChebyshev) GetNodes() []float64 {
+	return g.nodes[g.order]
+}
+
+// GetWeights implements GaussianQuadrature.
+func (g *GaussChebyshev) GetWeights() []float64 {
+	return g.weights[g.order]
+}
+
+// GetOffset implements GaussianQuadrature.
+func (g *GaussChebyshev) GetOffset(leftInterval, rightInterval float64) float64 {
+	// Gauss-Chebyshev quadrature doesn't need offset transformation
+	return 0.0
+}
+
+// GetScalingFactor implements GaussianQuadrature.
+func (g *GaussChebyshev) GetScalingFactor(leftInterval, rightInterval float64) float64 {
+	// Gauss-Chebyshev quadrature doesn't need scaling transformation
+	return 1.0
+}
+
+// AllowPartitioning implements GaussianQuadrature.
+func (g *GaussChebyshev) AllowPartitioning() bool {
+	// Gauss-Chebyshev quadrature is for [-1, 1] interval and doesn't support partitioning
+	return false
 }
