@@ -20,7 +20,7 @@ const (
 	minimumOrder = 2
 )
 
-var ErrInvalidOrder = errors.New("invalid order for Gauss-Legendre quadrature, must be between 2 and 4")
+var ErrInvalidOrder = errors.New("invalid order for quadrature, must be between 2 and 4")
 
 var _ GaussianQuadrature = (*GaussLegendre)(nil)
 
